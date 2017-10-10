@@ -72,11 +72,6 @@ int main()
 		
 	}	 
  	//判别加减法
- 
- 
- 
-
- 
  	count=0;
  	if(first->fuhao=='-'){
 	 	count++;
@@ -86,11 +81,6 @@ int main()
 		count++;
 	}
 	 
-	
-		
-			
-				
-					
 	if(count==0||count==2){
 		printf("同号\n");
 		Node*longerp=longer;
@@ -131,12 +121,6 @@ int main()
 		} 
 	}
 				
-
-
-
-
-
-
 //-------------------------------------------------------------------------
  	if(count==1){
 		printf("不同号\n"); 
