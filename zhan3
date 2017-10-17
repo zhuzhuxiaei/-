@@ -1,0 +1,40 @@
+#include <stdio.h>
+#define size 8
+#define int Nextdirec
+typedef struct S
+{
+	int x=0;
+	int y=0;	
+}seat;
+typedef struct DA da;
+typedef struct DA
+{
+	seat se;
+	Nextdirec ne;
+	da Next;
+	da last;
+		
+}da;
+typedef struct ZHAN
+{
+	
+}zhan;
+		
+int main(){
+	printf("请输入起始位置\n");
+	return 0;
+}
+int popzhan(){
+	
+}
+int pushzhan(){
+	
+}
+bool judgeISUSED(int x,int y,int a[8][8]){
+	if(a[x][y]==0) return false;
+	else return true;//如果用过就会返回true
+}
+bool judgeISOUT(int x,int y){
+	if(x<0||x>7||y<0||y>7) return true;
+	else {return false};//如果超出就会返回true
+}
