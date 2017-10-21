@@ -1,3 +1,6 @@
+/*
+这还只是个雏形，还没动手做
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #define size 8
