@@ -1,9 +1,6 @@
-/*
-非贪心跑了两个小时没出来之后，就改用贪心了，跑的非常快
-*/
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <windows.h>
 bool judgeISUSED(int x,int y,int a[8][8]);
 bool judgeISOUT(int x,int y);
@@ -114,6 +111,9 @@ int showChessBoard(int a[8][8]){
 		}
 		printf("\n");
 	}
+	Sleep(100);
+	return 0;
+	
 }
 
 //以后不允许用for循环 
