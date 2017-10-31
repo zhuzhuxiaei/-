@@ -32,26 +32,26 @@ int main(){
 		}else if(strcmp(command,"stop")){
 			return 0;
 		}else if(strcmp(command,"view")){
-			viewTree(point);
+			viewTree(root);
 		}
 	}
 	return 0;
 }
-int expandNode(node** M){
+int expandNode(node** point){
 	int command=0;
 	printf("是否有左子数,0=no ,1=yes\n");
 	scanf("%d",&command);
 	fflush(stdin);
 	if(command==0){
 		printf("无左子树");
-		(*M)->left=NULL; 
+		(*point)->left=NULL; 
 	}else if(command==1){
 		printf("请输入左子树值");
 		node *templeft=(node*)malloc(sizeof(node));
 		scanf("%c",&templeft->value);
 		fflush(stdin);
-		(*M)->left=templeft;
-		templeft->father=(*M);		 
+		(*point)->left=templeft;
+		templeft->father=(*point);		 
 	}else{
 		printf("输入错误");
 		return 0; 
@@ -62,14 +62,14 @@ int expandNode(node** M){
 	fflush(stdin);
 	if(command==0){
 		printf("无右子树");
-		(*M)->right=NULL; 
+		(*point)->right=NULL; 
 	}else if(command==1){
 		printf("请输入右子树值");
 		node* tempright=(node*)malloc(sizeof(node));
 		scanf("%c",&tempright->value);
 		fflush(stdin);
-		(*M)->right=tempright;
-		tempright->father=(*M);	 
+		(*point)->right=tempright;
+		tempright->father=(*point);	 
 	}
 }
 int wheretoGo(node** point){
