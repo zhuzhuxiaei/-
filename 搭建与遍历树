@@ -1,0 +1,103 @@
+/*
+定义二叉树节点类型，逐个要求输入 
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct DA node;
+struct DA{
+	node *left;
+	node *right;
+	node *father;
+	char value; 
+};
+int expandNode(node** M);
+int wheretoGo(node** point);
+int viewTree(node* point);
+int main(){
+	printf("请输入根节点的值\n");
+	node* root=(node*)malloc(sizeof(node));
+	node* point;//指向当前子树
+	point=root; 
+	scanf("%c",&root->value);
+	fflush(stdin);
+	char command[100];
+	while(true){
+		printf("请输入指令;");
+		scanf("%s",command);
+		if(strcmp(command,"ex")==0){
+			expandNode(&point);
+		}else if(strcmp(command,"go")){
+			wheretoGo(&point);
+		}else if(strcmp(command,"stop")){
+			return 0;
+		}else if(strcmp(command,"view")){
+			viewTree(point);
+		}
+	}
+	return 0;
+}
+int expandNode(node** M){
+	int command=0;
+	printf("是否有左子数,0=no ,1=yes\n");
+	scanf("%d",&command);
+	fflush(stdin);
+	if(command==0){
+		printf("无左子树");
+		(*M)->left=NULL; 
+	}else if(command==1){
+		printf("请输入左子树值");
+		node *templeft=(node*)malloc(sizeof(node));
+		scanf("%c",&templeft->value);
+		fflush(stdin);
+		(*M)->left=templeft;
+		templeft->father=(*M);		 
+	}else{
+		printf("输入错误");
+		return 0; 
+	}
+	command=0;
+	printf("是否有右子树");
+	scanf("%d",command);
+	fflush(stdin);
+	if(command==0){
+		printf("无右子树");
+		(*M)->right=NULL; 
+	}else if(command==1){
+		printf("请输入右子树值");
+		node* tempright=(node*)malloc(sizeof(node));
+		scanf("%c",&tempright->value);
+		fflush(stdin);
+		(*M)->right=tempright;
+		tempright->father=(*M);	 
+	}
+}
+int wheretoGo(node** point){
+	s:printf("请输入命令,使当前指针移动\n1--向左  2--向右  3--向上");
+	int command=0;
+  	scanf("%d",&command);
+	fflush(stdin);
+	if(command==0){
+		printf("输入错误\n");
+		goto s;
+	}else if(command==1){
+		(*point)=(*point)->left; 
+	}else if(command==2){
+		(*point)=(*point)->right;
+	}else if(command==3){
+		(*point)=(*point)->father;
+	}else{
+		printf("输入错误\n");
+		return 0;
+	}
+}
+int viewTree(node* point){
+	node *temp=point;
+	//viewleft
+	if(temp->left!=NULL) viewTree(temp->left);
+	//viewhimself
+	printf("-----%d\n",temp->value);
+	//viewright
+	if(temp->right!=NULL) viewTree(temp->right);
+	return 0;
+} 
