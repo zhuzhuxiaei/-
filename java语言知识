@@ -1,0 +1,157 @@
+Java ArrayList、Vector和LinkedList等的差别与用法（转）
+
+ArrayList 和Vector是采取数组体式格式存储数据，此数组元素数大于实际存储的数据以便增长和插入元素，都容许直接序号索引元素，然则插入数据要设计到数组元素移动等内存操纵，所以索引数据快插入数据慢，Vector因为应用了synchronized办法（线程安然）所以机能上比ArrayList要差，LinkedList应用双向链表实现存储，按序号索引数据须要进行向前或向后遍历，然则插入数据时只须要记录本项的前后项即可，所以插入数度较快！
+
+线性表，链表，哈希表是常用的数据布局，在进行Java开辟时，JDK已经为我们供给了一系列响应的类来实现根蒂根基的数据布局。这些类均在java.util包中。本文试图经由过程简单的描述，向读者论说各个类的感化以及如何正确应用这些类。
+
+Collection
+├List
+│├LinkedList
+│├ArrayList
+│└Vector
+│　└Stack
+└Set
+Map
+├Hashtable
+├HashMap
+└WeakHashMap
+
+Collection接口
+　　Collection是最根蒂根基的凑集接口，一个Collection代表一组Object，即Collection的元素（Elements）。一些Collection容许雷同的元素而另一些不可。一些能排序而另一些不可。Java SDK不供给直接持续自Collection的类，Java SDK供给的类都是持续自Collection的“子接口”如List和Set。
+　　所有实现Collection接口的类都必须供给两个标准的机关函数：无参数的机关函数用于创建一个空的Collection，有一个Collection参数的机关函数用于创建一个新的Collection，这个新的Collection与传入的Collection有雷同的元素。后一个机关函数容许用户复制一个Collection。
+　　如何遍历Collection中的每一个元素？非论Collection的实际类型如何，它都支撑一个iterator（）的办法，该办法返回一个迭代子，应用该迭代子即可一一接见Collection中每一个元素。典范的用法如下：
+　　　　Iterator it = collection.iterator（）; // 获得一个迭代子
+　　　　while（it.hasNext（）） {
+　　　　　　Object obj = it.next（）; // 获得下一个元素
+　　　　}
+　　由Collection接口派生的两个接口是List和Set。
+
+List接口
+　　List是有序的Collection，应用此接口可以或许正确的把握每个元素插入的地位。用户可以或许应用索引（元素在List中的地位，类似于数组下标）来接见List中的元素，这类似于Java的数组。
+和下面要提到的Set不合，List容许有雷同的元素。
+　　除了具有Collection接口必备的iterator（）办法外，List还供给一个listIterator（）办法，返回一个ListIterator接口，和标准的Iterator接口比拟，ListIterator多了一些add（）之类的办法，容许添加，删除，设定元素，还能向前或向后遍历。
+　　实现List接口的常用类有LinkedList，ArrayList，Vector和Stack。
+
+LinkedList类
+　　LinkedList实现了List接口，容许null元素。此外LinkedList供给额外的get，remove，办法在LinkedList的首部或尾部。这些操纵使LinkedList可被用作客栈（stack），队列（queue）或双向队列（deque）。
+　　重视LinkedList没有同步办法。若是多个线程同时接见一个List，则必须本身实现接见同步。一种解决办法是在创建List机会关一个同步的List：
+　　　　List list = Collections.synchronizedList（new LinkedList（...））;
+
+ArrayList类
+　　ArrayList实现了可变大小的数组。它容许所有元素，包含null。ArrayList没有同步。
+size，isEmpty，get，set办法运行时候为常数。然则add办法开销为分摊的常数，添加n个元素须要O（n）的时候。其他的办法运行时候为线性。
+　　每个ArrayList实例都有一个容量（Capacity），即用于存储元素的数组的大小。这个容量可跟着络续添加新元素而主动增长，然则增长算法并没有定义。当须要插入多量元素时，在插入前可以调用ensureCapacity办法来增长ArrayList的容量以进步插入效力。
+　　和LinkedList一样，ArrayList也长短同步的（unsynchronized）。
+
+Vector类
+　　Vector很是类似ArrayList，然则Vector是同步的。由Vector创建的Iterator，固然和ArrayList创建的Iterator是同一接口，然则，因为Vector是同步的，当一个Iterator被创建并且正在被应用，另一个线程改变了Vector的状况（例如，添加或删除了一些元素），这时调用Iterator的办法时将抛出ConcurrentModificationException，是以必须捕获该异常。
+
+Stack 类
+　　Stack持续自Vector，实现一个掉队先出的客栈。Stack供给5个额外的办法使得Vector得以被算作客栈应用。根蒂根基的push和pop办法，还有peek办法获得栈顶的元素，empty办法测试客栈是否为空，search办法检测一个元素在客栈中的地位。Stack刚创建后是空栈。
+
+Set接口
+　　Set是一种不包含反复的元素的Collection，即随便率性的两个元素e1和e2都有e1.equals（e2）=false，Set最多有一个null元素。
+　　很明显，Set的机关函数有一个束缚前提，传入的Collection参数不克不及包含反复的元素。
+　　请重视：必须警惕操纵可变对象（Mutable Object）。若是一个Set中的可变元素改变了自身状况导致Object.equals（Object）=true将导致一些题目。
+
+Map接口
+　　请重视，Map没有持续Collection接口，Map供给key到value的映射。一个Map中不克不及包含雷同的key，每个key只能映射一个value。Map接口供给3种凑集的视图，Map的内容可以被算作一组key凑集，一组value凑集，或者一组key-value映射。
+
+Hashtable类
+　　Hashtable持续Map接口，实现一个key-value映射的哈希表。任何非空（non-null）的对象都可作为key或者value。
+　　添加数据应用put（key， value），取出数据应用get（key），这两个根蒂根基操纵的时候开销为常数。
+Hashtable经由过程initial capacity和load factor两个参数调剂机能。凡是缺省的load factor 0.75较好地实现了时候和空间的均衡。增大load factor可以节俭空间但响应的查找时候将增大，这会影响像get和put如许的操纵。
+应用Hashtable的简单示例如下，将1，2，3放到Hashtable中，他们的key分别是”one”，”two”，”three”：
+　　　　Hashtable numbers = new Hashtable（）;
+　　　　numbers.put（“one”， new Integer（1））;
+　　　　numbers.put（“two”， new Integer（2））;
+　　　　numbers.put（“three”， new Integer（3））;
+　　要取出一个数，比如2，用响应的key：
+　　　　Integer n = （Integer）numbers.get（“two”）;
+　　　　System.out.println（“two = ” + n）;
+　　因为作为key的对象将经由过程策画其散列函数来断定与之对应的value的地位，是以任何作为key的对象都必须实现hashCode和equals办法。hashCode和equals办法持续自根类Object，若是你用自定义的类算作key的话，要相当警惕，遵守散列函数的定义，若是两个对象雷同，即obj1.equals（obj2）=true，则它们的hashCode必须雷同，但若是两个对象不合，则它们的hashCode不必然不合，若是两个不合对象的hashCode雷同，这种现象称为冲突，冲突会导致操纵哈希表的时候开销增大，所以尽量定义好的hashCode（）办法，能加快哈希表的操纵。
+　　若是雷同的对象有不合的hashCode，对哈希表的操纵会呈现意想不到的成果（等待的get办法返回null），要避免这种题目，只须要紧记一条：要同时复写equals办法和hashCode办法，而不要只写此中一个。
+　　Hashtable是同步的。
+
+HashMap类
+　　HashMap和Hashtable类似，不合之处在于HashMap长短同步的，并且容许null，即null value和null key。，然则将HashMap视为Collection时（values（）办法可返回Collection），其迭代子操纵时候开销和HashMap的容量成比例。是以，若是迭代操纵的机能相当首要的话，不要将HashMap的初始化容量设得过高，或者load factor过低。
+
+WeakHashMap类
+　　WeakHashMap是一种改进的HashMap，它对key实验“弱引用”，若是一个key不再被外部所引用，那么该key可以被GC收受接管。
+
+总结
+　　若是涉及到客栈，队列等操纵，应当推敲用List，对于须要快速插入，删除元素，应当应用LinkedList，若是须要快速随机接见元素，应当应用ArrayList。
+　　若是法度在单线程景象中，或者接见仅仅在一个线程中进行，推敲非同步的类，其效力较高，若是多个线程可能同时操纵一个类，应当应用同步的类。
+　　要希罕重视对哈希表的操纵，作为key的对象要正确复写equals和hashCode办法。
+　　尽量返回接口而非实际的类型，如返回List而非ArrayList，如许若是今后须要将ArrayList换成LinkedList时，客户端代码不消改变。这就是针对抽象编程。
+
+同步性
+Vector是同步的。这个类中的一些办法包管了Vector中的对象是线程安然的。而ArrayList则是异步的，是以ArrayList中的对象并不是线程安然的。因为同步的请求会影响履行的效力，所以若是你不须要线程安然的凑集那么应用ArrayList是一个很好的选择，如许可以避免因为同步带来的不须要的机能开销。
+数据增长
+从内部实现机制来讲ArrayList和Vector都是应用数组（Array）来把握凑集中的对象。当你向这两种类型中增长元素的时辰，若是元素的数量超出了内部数组今朝的长度它们都须要扩大内部数组的长度，Vector缺省景象下主动增长本来一倍的数组长度，ArrayList是本来的50％，所以最后你获得的这个凑集所占的空间老是比你实际须要的要大。所以若是你要在凑集中保存多量的数据那么应用Vector有一些上风，因为你可以经由过程设置凑集的初始化大小来避免不须要的资料开销。
+应用模式
+在ArrayList和Vector中，从一个指定的地位（经由过程索引）查找数据或是在凑集的末尾增长、移除一个元素所花费的时候是一样的，这个时候我们用O（1）默示。然则，若是在凑集的其他地位增长或移除元素那么花费的时候会呈线形增长：O（n-i），此中n代表凑集中元素的个数，i代表元素增长或移除元素的索引地位。为什么会如许呢？认为在进行上述操纵的时辰凑集中第i和第i个元素之后的所有元素都要履行位移的操纵。这一切意味着什么呢？
+这意味着，你只是查找特定地位的元素或只在凑集的末尾增长、移除元素，那么应用Vector或ArrayList都可以。若是是其他操纵，你最好选择其他的凑集操纵类。比如，LinkList凑集类在增长或移除凑集中任何地位的元素所花费的时候都是一样的？O（1），但它在索引一个元素的应用缺斗劲慢－O（i），此中i是索引的地位.应用ArrayList也很轻易，因为你可以简单的应用索引来庖代创建iterator对象的操纵。LinkList也会为每个插入的元素创建对象，所有你要熟悉打听它也会带来额外的开销。
+最后，在《Practical Java》一书中Peter Haggar建议应用一个简单的数组（Array）来庖代Vector或ArrayList。尤其是对于履行效力请求高的法度更应如此。因为应用数组（Array）避免了同步、额外的办法调用和不须要的从头分派空间的操纵。
+
+
+
+
+
+
+
+
+
+
+
+>标识符由大小写字母, 下划线, 数字, $符号组成.
+
+ 
+
+2>开头可以是大小写字母, 下划线, 和$符号.(数字不能开头)
+
+ 
+
+3>标识符长度没有限制
+
+ 
+
+4>标识符不能是关键子和保留字
+
+ 
+
+标识符的命名最好能反映出其作用 ,Java语言对字母的大小写有严格的要求.所有自定义标识符需全部遵循标识符的命名规范.
+
+ 
+
+变量: 
+
+ 1>如果是单个单词, 单词全部字母小写. 如:intcount;
+
+      
+
+ 2>如果是由多个单词组成的复合单词, 除第一个单词外,  其后所有单词首字母大写. 如: codeName;
+
+ 
+
+常量 :
+
+ 常量所有单词字母大写, 如果是由多个单词组成, 由下划线连接.如:String PERSON_NAME;
+
+ 
+
+方法:
+
+方法命名规范与变量相似, 如 count(); getSum();
+
+ 
+
+类: 
+
+ 类名的所有单词首字母均大写. 如Person{}  , DataCenter{};
+
+ 
+
+包:  
+
+用小写的倒置域名来命名. 格式: 前缀 + 项目名 + 模块名 + 层如: org.itfuture.domain.sorts  
