@@ -1,0 +1,669 @@
+常用指令
+
+ls　　        显示文件或目录
+
+     -l           列出文件详细信息l(list)
+
+     -a          列出当前目录下所有文件及目录，包括隐藏的a(all)
+
+mkdir         创建目录
+
+     -p           创建目录，若无父目录，则创建p(parent)
+
+cd               切换目录
+
+touch          创建空文件
+
+echo            创建带有内容的文件。
+
+cat              查看文件内容
+
+cp                拷贝
+
+mv               移动或重命名
+
+rm               删除文件
+
+     -r            递归删除，可删除子目录及文件
+
+     -f            强制删除
+
+find              在文件系统中搜索某文件
+
+wc                统计文本中行数、字数、字符数
+
+grep             在文本文件中查找某个字符串
+
+rmdir           删除空目录
+
+tree             树形结构显示目录，需要安装tree包
+
+pwd              显示当前目录
+
+ln                  创建链接文件
+
+more、less  分页显示文本文件内容
+
+head、tail    显示文件头、尾内容
+
+ctrl+alt+F1  命令行全屏模式
+
+ 
+
+
+
+
+
+
+
+
+系统管理命令
+
+stat              显示指定文件的详细信息，比ls更详细
+
+who               显示在线登陆用户
+
+whoami          显示当前操作用户
+
+hostname      显示主机名
+
+uname           显示系统信息
+
+top                动态显示当前耗费资源最多进程信息
+
+ps                  显示瞬间进程状态 ps -aux
+
+du                  查看目录大小 du -h /home带有单位显示目录信息
+
+df                  查看磁盘大小 df -h 带有单位显示磁盘信息
+
+ifconfig          查看网络情况
+
+ping                测试网络连通
+
+netstat          显示网络状态信息
+
+man                命令不会用了，找男人  如：man ls
+
+clear              清屏
+
+alias               对命令重命名 如：alias showmeit="ps -aux" ，另外解除使用unaliax showmeit
+
+kill                 杀死进程，可以先用ps 或 top命令查看进程的id，然后再用kill命令杀死进程。
+
+locate            查找目标文件或则目标目录路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+打包压缩相关命令
+
+gzip：
+
+bzip2：
+
+tar:                打包压缩
+
+     -c              归档文件
+
+     -x              压缩文件
+
+     -z              gzip压缩文件
+
+     -j              bzip2压缩文件
+
+     -v              显示压缩或解压缩过程 v(view)
+
+     -f              使用档名
+
+例：
+
+tar -cvf /home/abc.tar /home/abc              只打包，不压缩
+
+tar -zcvf /home/abc.tar.gz /home/abc        打包，并用gzip压缩
+
+tar -jcvf /home/abc.tar.bz2 /home/abc      打包，并用bzip2压缩
+
+当然，如果想解压缩，就直接替换上面的命令  tar -cvf  / tar -zcvf  / tar -jcvf 中的“c” 换成“x” 就可以了。
+ 
+文件类型 	执行动作 	命令
+.tar 	解包 	tar xvf FileName.tar
+.tar 	打包 	tar cvf FileName.tar DirName
+.gz 	解压1 	gunzip FileName.gz
+.gz 	解压2 	gzip -d FileName.gz
+.gz 	压缩 	gzip FileName
+.tar.gz 和 .tgz 	解压 	tar zxvf FileName.tar.gz
+.tar.gz 和 .tgz 	压缩 	tar zcvf FileName.tar.gz DirName
+.bz2 	解压1 	bzip2 -d FileName.bz2
+.bz2 	解压2 	bunzip2 FileName.bz2
+.bz2 	压缩 	bzip2 -z FileName
+.tar.bz2 	解压 	tar jxvf FileName.tar.bz2
+.tar.bz2 	压缩 	tar jcvf FileName.tar.bz2 DirName
+.bz 	解压1 	bzip2 -d FileName.bz
+.bz 	解压2 	bunzip2 FileName.bz
+.tar.bz 	解压 	tar jxvf FileName.tar.bz
+.Z 	解压 	uncompress FileName.Z
+.Z 	压缩 	compress FileName
+.tar.Z 	解压 	tar Zxvf FileName.tar.Z
+.tar.Z 	压缩 	tar Zcvf FileName.tar.Z DirName
+.zip 	解压 	unzip FileName.zip
+.zip 	压缩 	zip FileName.zip DirName
+.rar 	解压 	rar x FileName.rar
+.rar 	压缩 	rar a FileName.rar DirName
+
+shutdown
+
+     -r             关机重启
+
+     -h             关机不重启
+
+     now          立刻关机
+
+halt               关机
+
+reboot          重启
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+Linux管道
+
+将一个命令的标准输出作为另一个命令的标准输入。也就是把几个命令组合起来使用，后一个命令除以前一个命令的结果。
+
+例：grep -r "close" /home/* | more       在home目录下所有文件中查找，包括close的文件，并分页输出。
+
+ 
+
+Linux软件包管理
+
+dpkg (Debian Package)管理工具，软件包名以.deb后缀。这种方法适合系统不能联网的情况下。
+
+比如安装tree命令的安装包，先将tree.deb传到Linux系统中。再使用如下命令安装。
+
+sudo dpkg -i tree_1.5.3-1_i386.deb         安装软件
+
+sudo dpkg -r tree                                     卸载软件
+
+ 
+
+注：将tree.deb传到Linux系统中，有多种方式。VMwareTool，使用挂载方式；使用winSCP工具等；
+
+APT（Advanced Packaging Tool）高级软件工具。这种方法适合系统能够连接互联网的情况。
+
+依然以tree为例
+
+sudo apt-get install tree                         安装tree
+
+sudo apt-get remove tree                       卸载tree
+
+sudo apt-get update                                 更新软件
+
+sudo apt-get upgrade        
+
+ 
+
+将.rpm文件转为.deb文件
+
+.rpm为RedHat使用的软件格式。在Ubuntu下不能直接使用，所以需要转换一下。
+
+sudo alien abc.rpm
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vim使用
+
+vim三种模式：命令模式、插入模式、编辑模式。使用ESC或i或：来切换模式。
+
+命令模式下：
+
+:q                      退出
+
+:q!                     强制退出
+
+:wq                   保存并退出
+
+:set number     显示行号
+
+:set nonumber  隐藏行号
+
+/apache            在文档中查找apache 按n跳到下一个，shift+n上一个
+
+yyp                   复制光标所在行，并粘贴
+
+h(左移一个字符←)、j(下一行↓)、k(上一行↑)、l(右移一个字符→)
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+用户及用户组管理
+
+/etc/passwd    存储用户账号
+
+/etc/group       存储组账号
+
+/etc/shadow    存储用户账号的密码
+
+/etc/gshadow  存储用户组账号的密码
+
+useradd 用户名
+
+userdel 用户名
+
+adduser 用户名
+
+groupadd 组名
+
+groupdel 组名
+
+passwd root     给root设置密码
+
+su root
+
+su - root 
+
+/etc/profile     系统环境变量
+
+bash_profile     用户环境变量
+
+.bashrc              用户环境变量
+
+su user              切换用户，加载配置文件.bashrc
+
+su - user            切换用户，加载配置文件/etc/profile ，加载bash_profile
+
+更改文件的用户及用户组
+
+sudo chown [-R] owner[:group] {File|Directory}
+
+例如：还以jdk-7u21-linux-i586.tar.gz为例。属于用户hadoop，组hadoop
+
+要想切换此文件所属的用户及组。可以使用命令。
+
+sudo chown root:root jdk-7u21-linux-i586.tar.gz
+
+ 
+
+文件权限管理
+
+三种基本权限
+
+R           读         数值表示为4
+
+W          写         数值表示为2
+
+X           可执行  数值表示为1
+
+如图所示，jdk-7u21-linux-i586.tar.gz文件的权限为-rw-rw-r--
+
+-rw-rw-r--一共十个字符，分成四段。
+
+第一个字符“-”表示普通文件；这个位置还可能会出现“l”链接；“d”表示目录
+
+第二三四个字符“rw-”表示当前所属用户的权限。   所以用数值表示为4+2=6
+
+第五六七个字符“rw-”表示当前所属组的权限。      所以用数值表示为4+2=6
+
+第八九十个字符“r--”表示其他用户权限。              所以用数值表示为2
+
+所以操作此文件的权限用数值表示为662 
+
+更改权限
+
+sudo chmod [u所属用户  g所属组  o其他用户  a所有用户]  [+增加权限  -减少权限]  [r  w  x]   目录名 
+
+例如：有一个文件filename，权限为“-rw-r----x” ,将权限值改为"-rwxrw-r-x"，用数值表示为765
+
+sudo chmod u+x g+w o+r  filename
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/：根目录，一般根目录下只存放目录，不要存放文件，/etc、/bin、/dev、/lib、/sbin应该和根目录放置在一个分区中
+
+/bin:   
+/usr/bin:可执行二进制文件的目录，如常用的命令ls、tar、mv、cat等。
+
+/boot：放置linux系统启动时用到的一些文件。/boot/vmlinuz为linux的内核文件，以及/boot/gurb。建议单独分区，分区大小100M即可
+
+/dev：存放linux系统下的设备文件，访问该目录下某个文件，相当于访问某个设备，常用的是挂载光驱mount /dev/cdrom /mnt。
+
+/etc：系统配置文件存放的目录，不建议在此目录下存放可执行文件，重要的配置文件有/etc/inittab、/etc/fstab、/etc/init.d、/etc/X11、/etc/sysconfig、/etc/xinetd.d修改配置文件之前记得备份。
+
+注：/etc/X11存放与x windows有关的设置。
+
+/home：系统默认的用户家目录，新增用户账号时，用户的家目录都存放在此目录下，~表示当前用户的家目录，~test表示用户test的家目录。建议单独分区，并设置较大的磁盘空间，方便用户存放数据
+
+/lib:/usr/lib:/usr/local/lib：系统使用的函数库的目录，程序在执行过程中，需要调用一些额外的参数时需要函数库的协助，比较重要的目录为/lib/modules。
+
+/lost+fount：系统异常产生错误时，会将一些遗失的片段放置于此目录下，通常这个目录会自动出现在装置目录下。如加载硬盘于/disk 中，此目录下就会自动产生目录/disk/lost+found
+
+/mnt:/media：光盘默认挂载点，通常光盘挂载于/mnt/cdrom下，也不一定，可以选择任意位置进行挂载。
+
+/opt：给主机额外安装软件所摆放的目录。如：FC4使用的Fedora 社群开发软件，如果想要自行安装新的KDE 桌面软件，可以将该软件安装在该目录下。以前的 Linux 系统中，习惯放置在 /usr/local 目录下
+
+/proc：此目录的数据都在内存中，如系统核心，外部设备，网络状态，由于数据都存放于内存中，所以不占用磁盘空间，比较重要的目录有/proc/cpuinfo、/proc/interrupts、/proc/dma、/proc/ioports、/proc/net/*等
+
+/root：系统管理员root的家目录，系统第一个启动的分区为/，所以最好将/root和/放置在一个分区下。
+
+/sbin:/usr/sbin:/usr/local/sbin：放置系统管理员使用的可执行命令，如fdisk、shutdown、mount等。与/bin不同的是，这几个目录是给系统管理员root使用的命令，一般用户只能"查看"而不能设置和使用。
+
+/tmp：一般用户或正在执行的程序临时存放文件的目录,任何人都可以访问,重要数据不可放置在此目录下
+
+/srv：服务启动之后需要访问的数据目录，如www服务需要访问的网页数据存放在/srv/www内
+
+/usr：应用程序存放目录         
+
+          /usr/bin存放应用程序
+
+          /usr/share存放共享数据
+
+          /usr/lib存放不能直接运行的，却是许多程序运行所必需的一些函数库文件。
+
+          /usr/local:存放软件升级包。
+
+          /usr/share/doc:系统说明文件存放目录。
+
+          /usr/share/man: 程序说明文件存放目录，使用 man ls时会查询/usr/share/man/man1/ls.1.gz的内容建议单独分区，设置较大的磁盘空间
+
+/var：放置系统执行过程中经常变化的文件，如随时更改的日志文件/var/log
+
+          /var/log/message：所有的登录文件存放目录
+
+          /var/spool/mail：邮件存放的目录
+
+          /var/run:程序或服务启动后，其PID存放在该目录下。建议单独分区，设置较大的磁盘空间
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+分类：
+
+原文地址：Linux ln(link) 命令详解 作者：apple_guet
+
+功能：为某一个文件或目录在另外一个位置建立一个同步的链接，类似Windows下的超级链接。
+
+这个命令最常用的参数是-s，具体用法是：
+sudo ln -s 源文件 目标文件
+
+     当我们需要在不同的目录，用到相同的文件时，我们不需要在每一个需要的目录下都放一个必须相同的文件，
+我们只要在某个固定的目录放上该文件，然后在其它的目录下用ln命令链接（link）它就可以，不必重复的占用磁
+盘空间。
+例如：sudo ln -s /usr/local/mysql/bin/mysqladmin /sbin/mysqladmin
+-s 是代号（symbolic）的意思。
+     若是可执行文件，一般我们将其链接到/sbin的目录下，这样可以直接输入文件名称执行命令了，而不需要带上
+目录地址。
+如在上例执行下面两个语句是等价的
+yajiu@yajiu-desktop:~$ mysqladmin -uroot -p password ubuntu
+yajiu@yajiu-desktop:~$ /usr/local/mysql/bin/mysqladmin -uroot -p password ubuntu
+
+这里有两点要注意：
+第一，ln命令会保持每一处链接文件的同步性，也就是说，不论你改动了哪一处，其它的文件都会发生相同的变化；
+第二，ln的链接又分软链接和硬链接两种，软链接就是ln -s ** **，它只会在你选定的位置上生成一个文件的镜像，
+不会占用磁盘空间，硬链接ln ** **，没有参数-s， 它会在你选定的位置上生成一个和源文件大小相同的文件，
+无论是软链接还是硬链接，文件都保持同步变化。
+     如果你用ls察看一个目录时，发现有的文件右上角有一个箭头，那就是一个用ln命令生成的文件，用ls -l命令
+去察看，就可以看到显示的link的路径了
+
+语　法：ln [-bdfinsv][-S <字尾备份字符串>][-V <备份方式>][--help][--version][源文件或目录][目标文件或
+目录] 或 ln [-bdfinsv][-S <字尾备份字符串>][-V <备份方式>][--help][--version][源文件或目录...][目的目录]
+
+补充说明：ln指令用在连接文件或目录，如同时指定两个以上的文件或目录，且最后的目的地是一个已经存在的
+目录，则会把前面指定的所有文件或目录复制到该目录中。若同时指定多个文件或目录，且最后的目的地并非是
+一个已存在的目录，则会出现错误信息。
+
+参　　数：
+-b或--backup      #删除，覆盖目标文件之前的备份
+-d或-F或--directory      #建立目录的硬连接
+-f或--force      #强行建立文件或目录的连接，不论文件或目录是否存在
+-i或--interactive      #覆盖既有文件之前先询问用户
+-n或--no-dereference      #将符号连接的目的目录视为一般文件
+-s或--symbolic      #对源文件建立符号连接，而非硬连接
+-S<字尾备份字符串>或--suffix=<字尾备份字符串>      #用"-b"参数备份目标文件 
+
+
+
+
+
+
+
+
+
+
+
+指令名称 : chmod
+使用权限 : 所有使用者
+使用方式 : chmod [-cfvR] [--help] [--version] mode file...
+说明 : Linux/Unix 的档案调用权限分为三级 : 档案拥有者、群组、其他。利用 chmod 可以藉以控制档案如何被他人所调用。
+参数 :
+mode : 权限设定字串，格式如下 : [ugoa...][[+-=][rwxX]...][,...]，其中
+u 表示该档案的拥有者，g 表示与该档案的拥有者属于同一个群体(group)者，o 表示其他以外的人，a 表示这三者皆是。
++ 表示增加权限、- 表示取消权限、= 表示唯一设定权限。
+r 表示可读取，w 表示可写入，x 表示可执行，X 表示只有当该档案是个子目录或者该档案已经被设定过为可执行。
+-c : 若该档案权限确实已经更改，才显示其更改动作
+-f : 若该档案权限无法被更改也不要显示错误讯息
+-v : 显示权限变更的详细资料
+-R : 对目前目录下的所有档案与子目录进行相同的权限变更(即以递回的方式逐个变更)
+--help : 显示辅助说明
+--version : 显示版本
+范例 :将档案 file1.txt 设为所有人皆可读取 :
+chmod ugo+r file1.txt 
+将档案 file1.txt 设为所有人皆可读取 :
+chmod a+r file1.txt 
+将档案 file1.txt 与 file2.txt 设为该档案拥有者，与其所属同一个群体者可写入，但其他以外的人则不可写入 :
+chmod ug+w,o-w file1.txt file2.txt 
+将 ex1.py 设定为只有该档案拥有者可以执行 :
+chmod u+x ex1.py 
+将目前目录下的所有档案与子目录皆设为任何人可读取 :
+chmod -R a+r * 
+
+
+
+
+此外chmod也可以用数字来表示权限如 chmod 777 file
+语法为：chmod abc file
+其中a,b,c各为一个数字，分别表示User、Group、及Other的权限。
+r=4，w=2，x=1
+若要rwx属性则4+2+1=7；
+若要rw-属性则4+2=6；
+若要r-x属性则4+1=5。
+范例：
+chmod a=rwx file 
+和
+chmod 777 file 
+效果相同
+chmod ug=rwx,o=x file 
+和
+chmod 771 file 
+效果相同
+若用chmod 4755 filename可使此程序具有root的权限.
+指令名称 : chown 
+使用权限 : root 
+
+使用方式 : chmod [-cfhvR] [--help] [--version] user[] file... 
+
+说 明 : Linux/Unix 是多人多工作业系统，所有的档案皆有拥有者。利用 chown 可以将档案的拥有者加以改变。一般来说，这个指令只有是由 系统管理者(root)所使用，一般使用者没有权限可以改变别人的档案拥有者，也没有权限可以自己的档案拥有者改设为别人。只有系统管理者(root)才 有这样的权限。 
+
+把计 : 
+
+user : 新的档案拥有者的使用者 IDgroup : 新的档案拥有者的使用者群 体(group)-c : 若该档案拥有者确实已经更改，才显示其更改动作-f : 若该档案拥有者无法被更改也不要显示错误讯息-h : 只对于连结 (link)进行变更，而非该 link 真正指向的档案-v : 显示拥有者变更的详细资料-R : 对目前目录下的所有档案与子目录进行相同的拥有者 变更(即以递回的方式逐个变更)--help : 显示辅助说明--version : 显示版本 
+
+范例 : 
+将档案 file1.txt 的拥有者设为 users 群体的使用者 jessie : 
+chown jessie:users file1.txt 
+
+将目前目录下的所有档案与子目录的拥有者皆设为 users 群体的使用者 lamport : 
+chmod -R lamport:users * 
+-rw------- (600) -- 只有属主有读写权限。 
+-rw-r--r-- (644) -- 只有属主有读写权限；而属组用户和其他用户只有读权限。 
+-rwx------ (700) -- 只有属主有读、写、执行权限。 
+-rwxr-xr-x (755) -- 属主有读、写、执行权限；而属组用户和其他用户只有读、执行权限。 
+-rwx--x--x (711) -- 属主有读、写、执行权限；而属组用户和其他用户只有执行权限。 
+-rw-rw-rw- (666) -- 所有用户都有文件读、写权限。这种做法不可取。 
+-rwxrwxrwx (777) -- 所有用户都有读、写、执行权限。更不可取的做法。 
+以下是对目录的两个普通设定: 
+
+drwx------ (700) - 只有属主可在目录中读、写。 
+drwxr-xr-x (755) - 所有用户可读该目录，但只有属主才能改变目录中的内容。
+--------------------------------------------------------------------------
+运行 .sh 文件类型的文件：
+用file命令测试一下看是什么类型的
+file xxxx.sh
+如果是Bourne-Again shell script 可以sh xxxx.sh 或者chmod +x xxxx.sh 再./xxx.sh
+一般 .sh 的直接添加x(可执行属性) chmod +x xxx.sh 然后./xxx.sh就可以了
+chmod是一个改变用户拥有指定文件的权限的命令.r:只读,w:写,x执行.也可以用数字
+
+
+可运行文件直接加./
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+用户命令，
+1，查看当前用户组
+	groups 【用户名】
+2，添加至sudoers用户组中
+	sudo usermod -G sudo [用户名]
+3，删除用户
+	sudo deluser 【用户名】 --remove-home
+
+
+
+
+
+dmesg查看内核硬件信息
+grep正则表达式输出到标准输出
+
+find [路径] [表达式]
