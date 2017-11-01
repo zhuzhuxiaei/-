@@ -1,0 +1,1 @@
+第一步打开/etc/apt/sources.list,然后添加源，网上选择一个即可，然后在终端，apt-get clean 然后 apt-get update即可
