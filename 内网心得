@@ -1,0 +1,9 @@
+通过nmap xxx.xxx.xxx.xxx扫描时，很有可能对方关了ping的回应，这个时候
+用nmap -Pn xxx.xxx.xxx即可扫描
+nmap比较有用的几个扫描方式
+1，sP这个扫描可以用于扫描c段存活主机
+2，sS tcp半开放式连接，即使关了ping也能扫描
+3, Pn也是可以扫描关ping的主机
+4，PU需要root权限，用udp的方式扫描
+5，sF扫描，终极扫描，比sS还强，不被记录，且可以判断主机类型，如果是windows则不会回应，因为windows忽略这种标准
+6，P0，扫描之前不ping主机，有点慢
