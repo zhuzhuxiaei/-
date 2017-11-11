@@ -24,7 +24,8 @@ struct TREE{
 	tree* son;
 	tree* brother;
 };
-int flag[size]={-1};
+static int* flag;
+static int size;
 da* creatJUZHENG(int size);
 list* changeJuzhentoList(da* ds,int size);
 int generateTree(int indexofflag,list* list_header,int indexofnode,int size,tree* my_tree);
@@ -34,6 +35,7 @@ int main(){
 	int size=0;
 	scanf("%d",&size);
 	fflush(stdin);
+	flag=(int*)malloc(sizeof(int)*size);
 	da *ds;
 	ds=creatJUZHENG(size);
 }
@@ -71,7 +73,7 @@ list* changeJuzhentoList(da* ds,int size){
 		pointnow->next=NULL;//至此首节点初始化完毕		
 		for(int j=0;j<=size-1;j++){
 			if(*(ds->point+(i*size)+j)==1){
-				list* newlistnode=(*list)malloc(sizeof(list));
+				list* newlistnode=(list*)malloc(sizeof(list));
 				newlistnode->value=j;
 				pointnow->next=newlistnode;
 				pointnow=newlistnode;
@@ -88,7 +90,7 @@ tree* changeListoTree(list* list_header,int size,int nextindex){
 	for(int j=0;j<=size-1;j++){
 		int judge=0;
 		for(int i=0;i<=size-1;i++){
-			if(flag[i]==(list_header+j)->value){
+			if(*(flag+i)==(list_header+j)->value){
 				judge=1;
 				break;	
 			}
@@ -97,7 +99,7 @@ tree* changeListoTree(list* list_header,int size,int nextindex){
 	}
 }
 int generateTree(int indexofflag,list* list_header,int indexofnode,int size,tree* my_tree){
-	flag[indexofflag]=indexofnode;
+	*(flag+indexofflag)=indexofnode;
 	list* list_header_now=list_header+indexofnode;
 	tree* new_tree=(tree*)malloc(sizeof(tree));
 	new_tree->son=NULL;
@@ -110,7 +112,7 @@ int generateTree(int indexofflag,list* list_header,int indexofnode,int size,tree
 		}
 		int judge=0;
 		for(int i=0;i<=size-1;i++){//循环flag数组看是否入栈，修改judge的值
-			if(flag[i]==list_header_now->value){ 
+			if(*(flag+i)==list_header_now->value){ 
 				judge=1;
 				break;
 			} //已经存在于flag数组中
