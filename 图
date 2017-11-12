@@ -5,8 +5,6 @@
 3．	通过深度优先搜索遍历该邻接表，形成的森林用二叉链表存储。
 4．	用凹入法打印森林。
 */
-//对我们而言，每个节点的符号是什么不关心，
-//重要的是每个节点的index
 #include <stdio.h>
 #include <stdlib.h>
 typedef struct DA da;
@@ -23,6 +21,7 @@ typedef struct TREE tree;
 struct TREE{
 	tree* son;
 	tree* brother;
+	int hisvalue;
 };
 static int* flag;
 static int size;
@@ -38,6 +37,7 @@ int main(){
 	flag=(int*)malloc(sizeof(int)*size);
 	da *ds;
 	ds=creatJUZHENG(size);
+	
 }
 da* creatJUZHENG(int size){//函数返回结构体指针
 	da* ds=(da*)malloc(sizeof(da));
@@ -86,6 +86,9 @@ list* changeJuzhentoList(da* ds,int size){
 }
 tree* changeListoTree(list* list_header,int size,int nextindex){
 	tree* treeroot=(tree*)malloc(sizeof(tree));
+	treeroot->brother=NULL;
+	treeroot->son=NULL;
+	treeroot->hisvalue=-1;
 	int indexofflag=0;
 	for(int j=0;j<=size-1;j++){
 		int judge=0;
@@ -97,14 +100,16 @@ tree* changeListoTree(list* list_header,int size,int nextindex){
 		}
 		if(judge=0) indexofflag=generateTree(indexofflag,list_header,j,size,treeroot)+1;
 	}
-}
+}//indexofflag数组使用到哪里,indexofnode就是node的符号，即list的value 
 int generateTree(int indexofflag,list* list_header,int indexofnode,int size,tree* my_tree){
 	*(flag+indexofflag)=indexofnode;
 	list* list_header_now=list_header+indexofnode;
 	tree* new_tree=(tree*)malloc(sizeof(tree));
 	new_tree->son=NULL;
 	new_tree->brother=my_tree->son;
-	my_tree->son=new_tree;//完成这个树节点的搭建
+	new_tree->hisvalue=indexofnode; 
+	my_tree->son=new_tree;
+	//完成这个树节点的搭建
 	while(1){
 		list_header_now=list_header_now->next;
 		if(list_header_now==NULL){
@@ -123,4 +128,14 @@ int generateTree(int indexofflag,list* list_header,int indexofnode,int size,tree
 		}
 	}	
 	return indexofflag;
+}
+int printTree(tree* treeroot,da* ds){
+	int expandposition=1;
+	tree* temptree=treeroot;
+	while(){
+		printf("%c",*((ds->Node)+(temptree->hisvalue)));
+		while(){
+			if(temptree->brother!=NULL) temptree
+		}
+	}
 }
