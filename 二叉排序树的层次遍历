@@ -1,0 +1,64 @@
+/*
+1．	进行二叉排序树的结点等类型的相关定义。
+2．	编写一个子程序递归地查找二叉排序树。
+3．	向二叉排序树中插入元素。这个过程利用前面的查找子程序，若找到同样的关键字，则返回FALSE，否则插入该元素，并保持结果仍然是二叉排序树，返回TRUE。
+4．	利用上述插入元素的算法，生成一棵二叉排序树。
+5．	编写一个子程序删除二叉排序树中指定关键字的元素。
+*/
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct DA tree;
+struct DA{
+	tree* left;
+	tree* right;
+	tree* father; 
+	int value;	
+};
+int main(){
+		
+}
+tree* createTree(){
+	printf("请输入根节点的值\n");
+	tree* treeroot=(tree*)malloc(sizeof(tree));
+	treeroot->left=NULL;
+	treeroot->right=NULL;
+	treeroot->father=NULL;
+	scanf("%d",&tree->value);
+	fflush(stdin);	
+}
+int insert_or_search_Tree(tree* treeroot,tree* newtree){
+	int command=1;
+	while(){
+		scanf("%d",&command);
+		if(command==-1) break;
+		tree* newtree=(tree*)malloc(sizeof(tree));
+		newtree->left=NULL;
+		newtree->right=NULL;
+		newtree->father=NULL;
+		newtree->value=command;
+		digui(treeroot,newtree);
+	}
+	return 0;
+}
+tree* digui(tree* fathertree,tree* newtree){
+	if(newtree->value>fathertree->value){
+		if(fathertree->right==NULL){
+			fathertree->right=newtree;
+			newtree->father=fathertree;
+		}else{
+			digui(fathertree->right,newtree);
+		}
+	}else 
+	if(newtree->value<fathertree->value){
+		if(fathertree->left==NULL){
+			fathertree->left=newtree;
+			newtree->father=fathertree;
+		}else{
+			digui(fathertree->left,newtree);
+		}
+	}else{
+		printf("该数已经存在"); 
+		return fathertree;
+	}
+				
+}
