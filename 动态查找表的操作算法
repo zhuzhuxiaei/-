@@ -1,7 +1,8 @@
 /*
 1．	进行二叉排序树的结点等类型的相关定义。
 2．	编写一个子程序递归地查找二叉排序树。
-3．	向二叉排序树中插入元素。这个过程利用前面的查找子程序，若找到同样的关键字，则返回FALSE，否则插入该元素，并保持结果仍然是二叉排序树，返回TRUE。
+3．	向二叉排序树中插入元素。这个过程利用前面的查找子程序，若找到同样的关键字，则返回FALSE，否则插入该元素，
+    并保持结果仍然是二叉排序树，返回TRUE。
 4．	利用上述插入元素的算法，生成一棵二叉排序树。
 5．	编写一个子程序删除二叉排序树中指定关键字的元素。
 */
@@ -15,7 +16,8 @@ struct DA{
 	int value;	
 };
 int main(){
-		
+	treeroot=creatTree();
+	
 }
 tree* createTree(){
 	printf("请输入根节点的值\n");
@@ -23,40 +25,45 @@ tree* createTree(){
 	treeroot->left=NULL;
 	treeroot->right=NULL;
 	treeroot->father=NULL;
-	scanf("%d",&tree->value);
+	scanf("%d",&treeroot->value);
 	fflush(stdin);	
+	return treeroot;
 }
-int insert_or_search_Tree(tree* treeroot,tree* newtree){
-	int command=1;
-	while(){
-		scanf("%d",&command);
-		if(command==-1) break;
-		tree* newtree=(tree*)malloc(sizeof(tree));
-		newtree->left=NULL;
-		newtree->right=NULL;
-		newtree->father=NULL;
-		newtree->value=command;
-		digui(treeroot,newtree);
-	}
-	return 0;
+tree* insert_or_search_Tree(tree* treeroot){
+	int command;
+	scanf("%d",&command);
+	tree* newtree=digui(treeroot,command);
+	return newtree;
 }
-tree* digui(tree* fathertree,tree* newtree){
-	if(newtree->value>fathertree->value){
+tree* digui(tree* fathertree,int command){ 
+	if(command>fathertree->value){ 
 		if(fathertree->right==NULL){
-			fathertree->right=newtree;
+			tree* newtree=(tree*)malloc(sizeof(tree));
+			newtree->value=command;
 			newtree->father=fathertree;
+			newtree->left=NULL;
+			newtree->right=NULL;
+			fathertree->right=newtree;
+			return newtree;
 		}else{
-			digui(fathertree->right,newtree);
+			tree* newtree=digui(fathertree->right,command);
+			return newtree;
 		}
 	}else 
-	if(newtree->value<fathertree->value){
+	if(command<fathertree->value){
 		if(fathertree->left==NULL){
-			fathertree->left=newtree;
+			tree* newtree=(tree*)malloc(sizeof(tree));
+			newtree->value=command;
 			newtree->father=fathertree;
+			newtree->left=NULL;
+			newtree->right=NULL;
+			fathertree->left=newtree;
+			return newtree; 
 		}else{
-			digui(fathertree->left,newtree);
+			tree* newtree=digui(fathertree->left,newtree);
+			return newtree;
 		}
-	}else{
+	}else{//相等，代表返回当前父亲 
 		printf("该数已经存在"); 
 		return fathertree;
 	}
