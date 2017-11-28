@@ -69,3 +69,4 @@ tree* digui(tree* fathertree,int command){
 	}
 				
 }
+
