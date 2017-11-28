@@ -1,8 +1,8 @@
 /*
 1．	进行二叉排序树的结点等类型的相关定义。
 2．	编写一个子程序递归地查找二叉排序树。
-3．	向二叉排序树中插入元素。这个过程利用前面的查找子程序，若找到同样的关键字，则返回FALSE，否则插入该元素，
-    并保持结果仍然是二叉排序树，返回TRUE。
+3．	向二叉排序树中插入元素。这个过程利用前面的查找子程序，若找到同样的关键字，
+则返回FALSE，否则插入该元素，并保持结果仍然是二叉排序树，返回TRUE。
 4．	利用上述插入元素的算法，生成一棵二叉排序树。
 5．	编写一个子程序删除二叉排序树中指定关键字的元素。
 */
@@ -10,13 +10,19 @@
 #include <stdlib.h>
 typedef struct DA tree;
 struct DA{
-	tree* left;
+	tree* left;//右边大，左边小 
 	tree* right;
 	tree* father; 
 	int value;	
 };
+tree* createTree();
+tree* insert_or_search_Tree(tree* treeroot);
+tree* digui(tree* fathertree,int command);
+tree* digui2(tree* thistree);
+int deleteTree(tree* treeroot);
 int main(){
-	treeroot=creatTree();
+	
+	tree* treeroot=creatTree();
 	
 }
 tree* createTree(){
@@ -69,4 +75,67 @@ tree* digui(tree* fathertree,int command){
 	}
 				
 }
-
+int deleteTree(tree* treeroot){
+	tree* thetree=insert_or_search_Tree(treeroot);
+	//分为四种情况，1，左右皆无。2，左有右无。3左无右有 。4左右皆有。 
+	if(thetree->left==NULL&&thetree->right==NULL) thetree=NULL;
+	else 
+	if(thetree->left!=NULL&&thetree->right==NULL){
+		if(thetree->value>thetree->father->value){//右子树
+			thetree->father->right=thetree->left;
+			thetree->left->father=thetree->father;
+			thetree=NULL; 
+			}else{
+			thetree->father->left=thetree->left;
+			thetree->left->father=thetree->father;
+			thetree=NULL;
+		}
+	}
+	else
+	if(thetree->left==NULL&&thetree->right!=NULL){
+		if(thetree->value>thetree->father->value){
+			thetree->father->right=thetree->right;
+			thetree->right->father=thetree->father;
+			thetree=NULL;
+		}else{
+			thetree->father->left=thetree->left;
+			thetree->right->father=thetree->father;
+			thetree=NULL;
+		}
+	}
+	else{//左右皆有,有两种调法，左子树的最右子树或是右子树的最左子树 ,这里选前者 
+		if(thetree->value>thetree->father->value){
+			tree* treechange=digui2(thetree->left);
+			//zhizhenjiaohuan
+			tree* treechangefather=treechange->father;
+			thetree->father->right=treechange;
+			treechange->father=thetree->father;
+			treechange->right=thetree->right;
+			thetree->right->father=treechange;
+			treechangefather->right=treechange->left;
+			treechange->left->father=treechangefather;
+			treechange->left=thetree->left;
+			thetree->left->father=treechange;
+			thetree=NULL;			
+		}else{
+			tree* treechange=digui2(thetree->left);
+			//zhizhenjiaohuan
+			tree* treechangefather=treechange->father;
+			thetree->father->left=treechange;
+			treechange->father=thetree->father;
+			treechange->right=thetree->right;
+			thetree->right->father=treechange;
+			treechangefather->right=treechange->left;
+			treechange->left->father=treechangefather;
+			treechange->left=thetree->left;
+			thetree->left->father=treechange;	
+			thetree=NULL;		
+		}
+		
+	}
+	return 0;
+}
+tree* digui2(tree* thistree){
+	if(thistree->right!==NULL) thistree=digui2(thistree->right);
+	return thistree;
+}
