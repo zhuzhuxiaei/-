@@ -19,7 +19,7 @@ int main(){
 	tstart=clock();
 	printf("%d\n",diedai(num));
 	tend=clock();  
-    printf("The pause used %f s by diedai()\n",difftime(tend,tstart));  
+    	printf("The pause used %f s by diedai()\n",difftime(tend,tstart));  
 	return 0; 
 } 
 int digui(int num){
