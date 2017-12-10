@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct DA list;
+struct DA{
+		list* next;
+		int value;
+}
+int main(){
+		list* alist=creatList();
+		list* blist=creatList();
+}
+list* creatList(){
+		printf("输入-1退出");
+		list* firstlist=(list*)malloc(sizeof(list));
+		scanf("%d",&firstlist->value);
+		firstlist->next=NULL;
+		list* templist=firstlist;
+		int temp;
+		while(1){
+				temp=0;
+				scanf("%d",&temp);
+				if(temp==-1){
+						break;
+				}
+				list* newlist=(list*)malloc(sizeof(list));
+				newlist->value=temp;
+				newlist->next=NULL;
+				templist->next=newlist;
+				templist=newlist;
+		}
+		return firstlist;
+}
+list* joinList(list* alist,list* blist){
+		list* temp;
+		list* clist;
+		list* blistnext=NULL;
+		if(alist->value<=blist->value) clist=alist;
+		else clist=blist;
+		temp=clist;
+		while(1){
+				if(blist==NULL) break;
+				while(clist->value<=blist->value){
+						temp=clist;
+						clist=clist->next;
+						if(clist==NULL){
+								temp->next=blist;
+								break;
+						}
+				}
+				if(clist==NULL) break;
+				temp->next=blist;
+				blistnext=blist->next;
+				blist->next=clist;
+				temp=blist;
+				blist=blistnext;
+				
+		}
+		return clist;
+}
+list* sortList(list* alist){
+		list* tail=alist;
+		list* compare;
+		list* judge;
+		list* judgebefore;
+		list* nextcompare=alist->next;
+		list* head=alist;
+		while(1){
+			compare=nextcompare;
+			judge=head;
+			if(compare==NULL) break;
+			while(compare->value>judge->value){
+					if(judge==tail){//judge到达tail
+							nextcompare=compare->next;
+							judge->next=compare;
+							judge=compare;//这一步是为了跳过下面的判断
+							tail=compare;
+							break;
+					}
+					judgebefore=judge;
+					judge=judge->next;
+			}//judge未至tail
+			if(judge==head){//judge未动
+					nextcompare=compare->next;
+					compare->next=head;
+					head=compare;
+			}
+			else{//judge在中间
+					nextcompare=compare->next;
+					compare->next=judge;
+					judgebefore->next=compare;
+			}
+		} 
+		return head;
+}
+
