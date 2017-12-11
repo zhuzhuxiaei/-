@@ -37,6 +37,7 @@ list* joinList(list* alist,list* blist){
 		if(alist->value<=blist->value) clist=alist;
 		else clist=blist;
 		temp=clist;
+		list* Clist=clist;
 		while(1){
 				if(blist==NULL) break;
 				while(clist->value<=blist->value){
@@ -55,7 +56,7 @@ list* joinList(list* alist,list* blist){
 				blist=blistnext;
 				
 		}
-		return clist;
+		return Clist;
 }
 list* sortList(list* alist){
 		list* tail=alist;
