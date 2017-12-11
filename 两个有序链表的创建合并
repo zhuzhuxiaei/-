@@ -1,13 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define test printf("hellp") 
 typedef struct DA list;
 struct DA{
 		list* next;
 		int value;
-}
+};
+list* creatList();
+list* joinList(list* alist,list* blist);
+list* sortList(list* alist);
+int printList(list* alist); 
 int main(){
 		list* alist=creatList();
+		alist=sortList(alist);
 		list* blist=creatList();
+		blist=sortList(blist);
+		list* clist=joinList(alist,blist);
+		printList(clist);
 }
 list* creatList(){
 		printf("输入-1退出");
@@ -37,7 +46,7 @@ list* joinList(list* alist,list* blist){
 		if(alist->value<=blist->value) clist=alist;
 		else clist=blist;
 		temp=clist;
-		list* Clist=clist;
+		list* Clist=clist; 
 		while(1){
 				if(blist==NULL) break;
 				while(clist->value<=blist->value){
@@ -58,24 +67,24 @@ list* joinList(list* alist,list* blist){
 		}
 		return Clist;
 }
-list* sortList(list* alist){
+list* sortList(list* alist){//36951
 		list* tail=alist;
-		list* compare;
-		list* judge;
-		list* judgebefore;
-		list* nextcompare=alist->next;
 		list* head=alist;
+		list* compare=NULL;
+		list* nextcompare=alist->next;
+		list* judge=NULL;
+		list* judgebefore=NULL;
 		while(1){
-			compare=nextcompare;
+			tail->next=NULL;
+		s:	compare=nextcompare;
 			judge=head;
 			if(compare==NULL) break;
 			while(compare->value>judge->value){
 					if(judge==tail){//judge到达tail
 							nextcompare=compare->next;
 							judge->next=compare;
-							judge=compare;//这一步是为了跳过下面的判断
 							tail=compare;
-							break;
+							goto s;
 					}
 					judgebefore=judge;
 					judge=judge->next;
@@ -93,4 +102,10 @@ list* sortList(list* alist){
 		} 
 		return head;
 }
-
+int printList(list* alist){
+		while(alist!=NULL){
+					printf("%d\n",alist->value);
+					alist=alist->next;
+		}
+		return 0;
+}
