@@ -75,8 +75,8 @@ list* sortList(list* alist){//36951
 		list* judge=NULL;
 		list* judgebefore=NULL;
 		while(1){
-			tail->next=NULL;
-		s:	compare=nextcompare;
+		s:	tail->next=NULL;
+			compare=nextcompare;
 			judge=head;
 			if(compare==NULL) break;
 			while(compare->value>judge->value){
