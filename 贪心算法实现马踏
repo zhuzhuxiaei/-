@@ -27,8 +27,8 @@ int main(){
 	a[x][y]=count;
 	while(true){
 	   	xNext[0]=xNext[3]=x+1;
-	    xNext[4]=xNext[7]=x-1;
-     	xNext[1]=xNext[2]=x+2;
+	        xNext[4]=xNext[7]=x-1;
+          	xNext[1]=xNext[2]=x+2;
 		xNext[5]=xNext[6]=x-2;
 			
 		yNext[0]=yNext[7]=y+2;
