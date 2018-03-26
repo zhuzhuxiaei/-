@@ -1,1 +1,85 @@
 
+#include <stdio.h>
+int time;
+int digui(int cengshu,int tankfactory,int choose);
+int main(){//淘淘问题的子问题，那就是，这种函数在何时停止造战车工厂最适合。函数将被设计成递归的形式。 
+//	int a;
+//	int b;
+	scanf("%d",&time);
+	printf("%d\n",digui(0,0,0));
+	
+ 
+} 
+int digui(int cengshu,int tankfactory,int choose){//choose==0生产factory,choose==1生产坦克 
+	if(cengshu>=time) return 0;
+	int numoftank;
+	int x;
+	int y;
+	if(choose){ //生产坦克 
+		numoftank=tankfactory;//这一层生产的坦克数量 
+		printf("第%d层选择生产tank\n",cengshu);
+		cengshu++;
+		x=digui(cengshu,tankfactory,1);//下一层选择生产tank 
+	 	y=digui(cengshu,tankfactory,0);//下一层选择生产factory 
+		if(x>y){
+			numoftank+=x;
+			return numoftank;
+		}
+		else {
+			numoftank+=y;
+			return numoftank;
+		}
+	}else{
+		numoftank=0;//这一层生产坦克数量为0;
+		printf("第%d层选择生产factory\n",cengshu);
+		cengshu++;
+		x=digui(cengshu,tankfactory+1,1);
+		y=digui(cengshu,tankfactory+1,0);
+		if(x>y){
+			numoftank+=x;
+			return numoftank; 
+		}else{
+			numoftank+=y;
+			return numoftank;
+		}
+	} 
+} 
+
+
+
+
+/*陶陶最近开始玩红警了，他玩的是自己MOD的一个红警版本。这个版本是这样的：你只能造两样东西，
+战车工厂和坦克。最初你有一个战车工厂，然后在接下来的每一秒内你可以有两种选择(假设当前有k个战车工厂)：
+1，建造一个战车工厂；2，建造k辆坦克。注意，战车工厂和坦克是不能同时建造的。
+陶陶在玩了一个月红警后，认为自己红警水平很厉害了。
+于是他向curimit发了一份挑战书，他还嚣张地说他会对curimit发动N次攻击。第i次攻击在第time[i]秒末，陶陶会使用num[i]辆坦克来进攻，消灭掉curimit家里同等数量的坦克。
+如果此时curimit家里没有这么多的坦克的话，那么curimit就死翘翘了。
+curimit接到战书后看到看到陶陶如此强大的攻势，被吓得不轻。他想请你帮帮忙，
+帮他制定一份作战计划（什么时候造战车工厂，什么时候造坦克）：curimit希望在抵挡了陶陶的N轮进攻之后，在第final秒末发动最终的总攻击，一举歼灭陶陶的老家。
+他希望你的作战计划能够在第final秒末造出最多数量的坦克*/
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct DA da;//cru的挑战，包括1，cru的挑战有几波 2，淘淘的反击在第几秒 3，两个int型指针，指向一个经过开辟的内存空间，内存空间保存每一波的秒数和坦克数量 
+struct DA{
+	int num_of_war;
+	int time_of_last_war;
+	int* pnum_of_tank;
+	int* ptime_of_war;	 
+};
+int tankwork();
+int main(){
+	da* da1=(da*)malloc(sizeof(da));
+	printf("请输入cru的挑战波数，cru淘淘的反击秒数.\n"); 
+	scanf("%d %d",&da1->num_of_war,&da1->time_of_last_war);
+	da1->pnum_of_tank=(int*)malloc(sizeof(int)*da1->num_of_war);
+	da1->ptime_of_war=(int*)malloc(sizeof(int)*da1->num_of_war);
+	for(int i=0;i<da1->num_of_war;i++){//先时间 后坦克数量 
+		scanf("%d %d",&(*(da1->ptime_of_war)),&(*(da1->pnum_of_tank)));
+		da1->ptime_of_war++;
+		da1->pnum_of_tank++;
+	}
+	 
+}
+int tankwork(da* da1){//这里显然用不到递归，可以用回溯法，然后结合贪心， 
+	
+}
