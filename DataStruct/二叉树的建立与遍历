@@ -1,0 +1,113 @@
+/*
+定义二叉树节点类型，逐个要求输入 
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct DA node;
+struct DA{
+	node *left;
+	node *right;
+	node *father;
+	char value; 
+};
+int expandNode(node** M);
+int wheretoGo(node** point);
+int viewTree(node* point);
+int main(){
+	printf("请输入根节点的值\n");
+	node* root=(node*)malloc(sizeof(node));
+	node* point;//指向当前子树
+	root->left=NULL;
+	root->right=NULL;
+	point=root; 
+	scanf("%c",&root->value);
+	fflush(stdin);
+	char command[20];
+	while(true){
+		printf("请输入指令\n");
+		scanf("%s",command);
+		fflush(stdin); 
+		if(!strcmp(command,"exp")){
+			expandNode(&point);
+			
+		}else if(!strcmp(command,"go")){
+			wheretoGo(&point);
+			
+		}else if(!strcmp(command,"stop")){
+			return 0;
+		}else if(!strcmp(command,"view")){
+			viewTree(root);
+		
+		}
+	}
+	return 0;
+}
+int expandNode(node** point){
+	int command=0;
+	printf("是否有左子数,0=no ,1=yes\n");
+	scanf("%d",&command);
+	fflush(stdin);
+	if(command==0){
+		printf("无左子树\n");
+		(*point)->left=NULL; 
+	}else if(command==1){
+		printf("请输入左子树值\n");
+		node *templeft=(node*)malloc(sizeof(node));
+		templeft->left=NULL;
+		templeft->right=NULL;
+		scanf("%c",&templeft->value);
+		fflush(stdin);
+		(*point)->left=templeft;
+		templeft->father=(*point);		 
+	}else{
+		printf("输入错误\n");
+		return 0; 
+	}
+	command=0;
+	printf("是否有右子树\n");
+	scanf("%d",&command);
+	fflush(stdin);
+	if(command==0){
+		printf("无右子树\n");
+		(*point)->right=NULL; 
+	}else if(command==1){
+		printf("请输入右子树值\n");
+		node* tempright=(node*)malloc(sizeof(node));
+		tempright->left=NULL;
+		tempright->right=NULL;
+		scanf("%c",&tempright->value);
+		fflush(stdin);
+		(*point)->right=tempright;
+		tempright->father=(*point);	 
+	}
+}
+int wheretoGo(node** point){
+	printf("请输入命令,使当前指针移动\n1--向左  2--向右  3--向上\n");
+	int command=0;
+  	scanf("%d",&command);
+	fflush(stdin);
+	if(command==0){
+		printf("输入错误\n");
+		return 0;
+	}else if(command==1){
+		if((*point)->left!=NULL)(*point)=(*point)->left;else printf("没有左树不能移动"); 
+	}else if(command==2){
+		if((*point)->right!=NULL)(*point)=(*point)->right;else printf("没有右树不能移动");
+	}else if(command==3){
+		if((*point)->father!=NULL)(*point)=(*point)->father;else printf("没有父树不能移动"); 
+	}else{
+		printf("输入错误\n");
+		return 0;
+	}
+}
+int viewTree(node* point){
+	node *temp=point;
+	//viewleft	
+	if(temp->left!=NULL) viewTree(temp->left);
+	//viewhimself
+ 	printf("-----%c\n",temp->value);
+	//viewright
+	if(temp->right!=NULL) viewTree(temp->right); 
+	return 0;
+} 
