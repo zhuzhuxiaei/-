@@ -1,0 +1,119 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+bool judgeISUSED(int x,int y,int a[8][8]);
+bool judgeISOUT(int x,int y);
+int pushzhan(int count,int x,int y,int direct);
+int showChessBoard(int a[8][8]);
+typedef struct{
+	int x;
+	int y;
+	int direct;
+}da;
+da zhan[64];
+da *point;
+int firstx,firsty;
+int main(){
+	int a[8][8]={0};
+	
+	int x=0,y=0;
+	int xNext[8]={0},yNext[8]={0};
+	int xxNext[8]={0},yyNext[8]={0};
+	int count=0;
+	printf("请输入坐标");
+	scanf("%d %d",&x,&y);
+	firstx=x;firsty=y;
+	a[x][y]=count;
+	while(true){
+	   	xNext[0]=xNext[3]=x+1;
+	        xNext[4]=xNext[7]=x-1;
+          	xNext[1]=xNext[2]=x+2;
+		xNext[5]=xNext[6]=x-2;
+			
+		yNext[0]=yNext[7]=y+2;
+		yNext[1]=yNext[6]=y+1;
+		yNext[2]=yNext[5]=y-1;
+		yNext[3]=yNext[4]=y-2;
+	
+		printf("\n终极查看count  %d\n",count); 
+		printf("-----%d %d-----\n",x,y);
+		 //for循环遍历所有子树 
+		int minnum=100,min=100;
+		
+		for(int i=0;i<=7;i++){
+			if(judgeISOUT(xNext[i],yNext[i])||judgeISUSED(xNext[i],yNext[i],a)) continue;
+			int num=0;
+			//构造子子树 
+			xxNext[0]=xxNext[3]=xNext[i]+1;
+	  		xxNext[4]=xxNext[7]=xNext[i]-1;
+			xxNext[1]=xxNext[2]=xNext[i]+2;
+			xxNext[5]=xxNext[6]=xNext[i]-2;
+			
+			yyNext[0]=yyNext[7]=yNext[i]+2;
+			yyNext[1]=yyNext[6]=yNext[i]+1;
+		 	yyNext[2]=yyNext[5]=yNext[i]-1;
+		 	yyNext[3]=yyNext[4]=yNext[i]-2;
+		 	//遍历所有子子树，得到所有子子树可用个数 
+			for(int j=0;j<=7;j++){
+				if(!judgeISUSED(xxNext[j],yyNext[j],a)&&!judgeISOUT(xxNext[j],yyNext[j])) num++;
+			}
+			//遍历结束 
+			if(num<minnum){
+			 	if(num==0)  minnum=minnum;//即该子树没可用节点，不要改变minnum的值
+				else{minnum=num; min=i;}//最重要的是min不能变 
+			 }
+		}
+		if(min==100){
+			//没有找到可用的子树，执行退栈操作 
+			//先将其子树中被标记为不可用的还回来
+			for(int k=0;k<=7;k++){
+				if(a[xNext[k]][yNext[k]]==-1)  a[xNext[k]][yNext[k]]=0;
+			} 
+			a[x][y]=-1;
+			x=point->x;
+			y=point->y;
+			point->x=0;
+			point->y=0;
+			point->direct=0;
+			point--;
+			count--;
+		}else{
+			//找到可用子树，入栈操作
+			a[x][y]=count;
+			pushzhan(count,x,y,min); 
+			count++;
+			x=xNext[min],y=yNext[min];
+		} 
+		if(count==62) showChessBoard(a);
+	}
+ 	return 0;
+}
+bool judgeISUSED(int x,int y,int a[8][8]){
+	if(a[x][y]==0&&(x!=firstx||y!=firsty)) return false;	
+	else return true;//如果用过就会返回true
+}
+bool judgeISOUT(int x,int y){
+	if(x<0||x>7||y<0||y>7) return true;
+	else return false;//如果超出就会返回true
+}
+int pushzhan(int count,int x,int y,int direct){
+	zhan[count].x=x;
+	zhan[count].y=y;
+	zhan[count].direct=direct;
+	point=&zhan[count];
+	return 0;
+}
+int showChessBoard(int a[8][8]){
+	for(int i=0;i<=7;i++){
+		for(int j=0;j<=7;j++){
+			printf("%d    ",a[j][i]);
+		}
+		printf("\n");
+	}
+	Sleep(100);
+	return 0;
+	
+}
+
+//以后不允许用for循环 
