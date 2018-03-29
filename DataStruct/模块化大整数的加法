@@ -1,0 +1,207 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <ctype.h>
+typedef struct DuLNode{
+	int data;
+	struct DuLNode *prior,*next;
+} DuLNode,*DuLinkList;
+/*Create a list only with a head node*/
+/*SignSymbol is 1 for "+", otherwise is -1 for "-"  */
+DuLinkList InitList(int SignSymbol){
+	DuLinkList s;
+	s=(DuLinkList)malloc(sizeof(DuLNode));
+	s->next=s->prior=s;
+	s->data=SignSymbol;
+	return s;
+}
+void InsertNodeAtTail(DuLinkList L,int group4){
+	DuLNode *s;
+	s=(DuLinkList)malloc(sizeof(DuLNode));
+	s->data =group4;
+	s->next=L;
+	s->prior=L->prior;
+	L->prior->next=s;
+	L->prior=s;
+}
+void InsertNodeAtHead(DuLinkList L, int group4){
+	DuLNode *s;
+	s=(DuLinkList)malloc(sizeof(DuLNode));
+	s->data =group4;
+	s->next=L->next;
+	s->prior=L;
+	L->next->prior=s;
+	L->next=s;
+
+}
+void DelNode(DuLinkList L,DuLNode *p){
+	p->prior->next=p->next;
+	p->next->prior=p->prior;
+	free(p);
+}
+void PrintList(DuLinkList L){
+	int FirstTime=1;
+	DuLNode *p=L;
+	if(p->data==-1) printf("-");
+	p=p->next;
+	while(p!=L){
+		if(FirstTime){
+			FirstTime=0;
+			printf("%d",p->data);
+		}
+		else{
+			printf(",%04d",p->data);
+		}
+		p=p->next;
+	}
+	printf("\n");
+}
+/*every long number spaced by "/n"*/
+DuLinkList InputData(){
+	int FirstNum=1,group4;
+	char c;
+	DuLinkList L;
+	L=(DuLinkList)malloc(sizeof(DuLNode));
+	L->next=L->prior=L;
+	printf("Please Input as Format: -203,1200\n");
+	if((c=getchar())=='-')
+		L=InitList(-1);
+	else
+		L=InitList(1);
+	if(isdigit(c)) ungetc(c,stdin);
+	do{
+		scanf("%d",&group4);
+		InsertNodeAtTail(L,group4);
+	}while((c=getchar())!='\n');
+	printf("Your Input is:\n");
+	PrintList(L);
+	return L;
+}
+
+void Add(DuLinkList a,DuLinkList b,DuLinkList c){
+	DuLinkList pa,pb;
+	int jinwei=0,tmp;
+	pa=a->prior;
+	pb=b->prior;
+	while(pa!=a && pb!=b){
+		tmp= pa->data+pb->data+jinwei;
+		if(tmp>=10000){
+			jinwei=1;
+			tmp-=10000;
+		}
+		else
+			jinwei=0;
+		InsertNodeAtHead(c,tmp);
+		pa=pa->prior;
+		pb=pb->prior;
+	}
+	while(pa!=a){
+		tmp=pa->data+jinwei;
+		if(tmp>=10000){
+			jinwei=1;
+			tmp-=10000;
+		}
+		else
+			jinwei=0;
+		InsertNodeAtHead(c,tmp);
+		pa=pa->prior;
+	}
+	while(pb!=b){
+		tmp=pb->data+jinwei;
+		if(tmp>=10000){
+			jinwei=1;
+			tmp-=10000;
+		}
+		else
+			jinwei=0;
+		InsertNodeAtHead(c,tmp);
+		pb=pb->prior;
+	}
+	if(jinwei!=0) InsertNodeAtHead(c,1);
+}
+
+void Sub(DuLinkList a,DuLinkList b,DuLinkList c){
+	DuLinkList pa,pb,pc;
+	int jiewei=0,tmp;
+	pa=a->prior;
+	pb=b->prior;
+	while(pb!=b && pa!=a){
+		if(pa->data>=pb->data+jiewei){
+			tmp=pa->data-pb->data-jiewei;
+			jiewei=0;
+		}
+		else{
+			tmp=10000+pa->data-pb->data-jiewei;
+			jiewei=1;
+		}
+		InsertNodeAtHead(c,tmp);
+		pa=pa->prior;
+		pb=pb->prior;
+	}
+	if(pa!=a || pa==a && pb==b && jiewei==0) c->data=a->data; /* a is big than b*/
+	if( c->data!=a->data){/*b is big*/
+		pc=c->prior;
+		while(pc!=c){
+			if(pc==c->prior)/*First Node*/ 
+				pc->data=10000-pc->data;
+			else
+				pc->data=9999-pc->data;
+			pc=pc->prior;
+		}
+		jiewei=jiewei?0:1;
+		while(pb!=b){
+			if(pb->data>=jiewei){
+				tmp=pb->data-jiewei;
+				jiewei=0;
+			}
+			else{
+				tmp=10000+pb->data-jiewei;
+				jiewei=1;
+			}
+			InsertNodeAtHead(c,tmp);
+			pb=pb->prior;
+		}
+	}
+	else{/*a is big*/
+		while(pa!=a){
+			if(pa->data>=jiewei){
+				tmp=pa->data-jiewei;
+				jiewei=0;
+			}
+			else{
+				tmp=10000+pa->data-jiewei;
+				jiewei=1;
+			}
+			InsertNodeAtHead(c,tmp);
+			pa=pa->prior;
+		}
+	}
+	pc=c->next;
+	while(pc->next!=c && pc->data==0){/*Del 0 at the left most */
+		pc=pc->next;
+		DelNode(c,pc->prior);
+	}
+}
+DuLinkList AddList(DuLinkList a,DuLinkList b){
+	DuLinkList c;
+	if(a->data*b->data>0){/*Sign is the same with each other*/
+		c=InitList(a->data);
+		Add(a,b,c);
+	}
+	else{
+		c=InitList(b->data);/*May be changed by result of sub*/
+		Sub(a,b,c);
+	}
+	return c;
+}
+int main(){
+	DuLinkList a,b,c;
+	a=InputData();
+	b=InputData();
+    c=AddList(a,b);
+	printf("The Sum Is:\n");
+	PrintList(c);
+	printf("Press any key to complete!\n");
+	getch();
+	return 0;
+}
