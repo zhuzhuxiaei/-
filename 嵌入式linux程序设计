@@ -1,0 +1,9 @@
+fdisk -l #查看硬盘分区2
+fdisk /dev/sda #显示分区sda的信息
+mkfs -c -V -t ext3 /dev/sda3 #在sda3分区上建立ext3文件系统
+#建立好文件系统即可挂载到根文件系统下的某个目录使用
+mount -t vfat /dev/hda3 /mnt/data #hda3即u盘名称，-t参数指定文件系统类型。1 
+cat file2 file1 > file3
+vi zz& #将zz在后台编辑
+nice -13 vi&  #后台运行，且优先级为-13
+fg bg # 前台后台运行
