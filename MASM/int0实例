@@ -1,0 +1,42 @@
+assume cs:code
+code segment
+start:
+	mov ax,cs
+	mov ds,ax
+	mov si,offset do0
+	mov ax,0
+	mov es,ax
+	mov di,200h;di，中断处理入口地址
+	mov cx,offset do0end-offset do0
+	cld
+	rep movsb
+	mov word ptr es:[0],200h;中断处理入口地址
+	mov word ptr es:[2],0;中断处理段地址
+	mov ax,1000h
+	mov dh,1h
+	div dh
+	mov ax,4c00h
+	int 21h
+do0:
+	jmp short do0start;为什么要用短转移，因为只有短转移才是根据偏移量来转移的
+	db "over flow!"
+do0start:
+	mov ax,cs
+	mov ds,ax
+	mov si,202h
+	mov ax,0b800h
+	mov es,ax
+	mov di,12*160+36*2
+	mov cx,10
+s:	
+  mov al,[si]
+	mov es:[di],al
+	inc si
+	add di,2
+	loop s
+	mov ax,4c00h
+	int 21h
+do0end:
+	nop
+code ends
+end start
