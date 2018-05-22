@@ -1,0 +1,221 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct NODE node;
+typedef struct LIST list;
+typedef struct LISTINFO listinfo;
+struct NODE{
+    int x;
+    int y;
+    int h;//相对距离
+    int g;//已走
+};
+struct LIST{
+    node* pnode;//当前节点
+    list* nlist;//下个节点
+    list* father;
+};
+struct LISTINFO{
+    list* plist;
+    int judge;
+};
+int borderx,bordery;//x行数，y列数
+node* src;
+node* des;
+list* openlist;
+list* closelist;
+int direction[4][2]={
+    {-1,0},{0,-1},{0,1},{1,0}
+}; 
+int* matrix;
+int* makeMatrix(int x,int y);
+int absolute(int a,int b);
+list* alist();
+list* expandOpenList(node* pnode,list* tempmin);
+list* deallist();
+void optoclolist(list* tempmin);
+int inList(list* plist,int x,int y);
+list* gettail(list* firstlist);
+list* attachList(list** ptailist,int x,int y);
+int illegalMap(int x,int y);
+void print(list* routelist);
+int main(){
+    list* routelist;
+    src=(node*)malloc(sizeof(node));
+    des=(node*)malloc(sizeof(node));
+    printf("please input the row and clo\n");
+    scanf("%d %d",&borderx,&bordery);
+    matrix=makeMatrix(borderx,bordery);
+    printf("please input the src node location\n");
+   	scanf("%d %d",&src->x,&src->y);
+    printf("please input the des node location\n");
+    scanf("%d %d",&des->x,&des->y);
+    src->g=0;
+    src->h=absolute(src->x,des->x)+absolute(src->y,des->y);
+    routelist=alist();
+    if(routelist!=NULL){
+        print(routelist);
+    }else{
+        printf("error\n");
+    }
+    return 0;
+}
+int* makeMatrix(int x,int y){//x行数，y列数
+    int sum=x*y;
+    int positionx=0;
+    int positiony=0;
+    int i; 
+    int* temp=(int*)malloc(sizeof(int)*sum);
+    for(i=0;i<sum;i++){
+        *(temp+i)=0;
+    }
+    while(1){
+        positionx=-1;
+        positiony=-1;
+        printf("please input the node that you want to change\n");
+        scanf("%d %d",&positionx,&positiony);
+        if(positionx==-1||positiony==-1) break;
+        *(temp+positionx*y+positiony)=1;
+    }
+    return temp;
+}
+list* alist(){
+    int judge=0;
+    list* routelist=NULL;
+    list* tempmin=NULL;
+    openlist=(list*)malloc(sizeof(list));//初次设置openlist
+    closelist=NULL;//初次设置closelist
+    openlist->father=NULL;
+    openlist->pnode=src;
+    openlist->nlist=NULL
+    while(1){
+        if(tempmin!=NULL){
+            //找到目标,建立链表。可以确定，包含tempnode节点的链一定是最后一个链。
+            routelist=tempmin;
+            while(1){
+             	if(tempmin->father==NULL) return routelist;
+                routelist=tempmin->father;
+                routelist->nlist=tempmin;
+			    tempmin=tempmin->father;
+            }
+        }else{
+            tempmin=deallist();  //先找到最小，然后扩展，然后移植，这一个函数统统解决
+        }
+    }
+    return routelist;
+}
+list* deallist(){
+    list* thekeyexpand=NULL;
+    list* ptemplist=openlist;//移动判断指针 
+    list* tempmin=openlist;//最小指针 一开始指向开头
+ 	  while(1){
+		ptemplist=openlist;
+		tempmin=openlist;
+		while(ptemplist!=NULL){
+	        if((tempmin->pnode->h+tempmin->pnode->g)>=(ptemplist->pnode->h+ptemplist->pnode->g)){
+	            tempmin=ptemplist;
+	            ptemplist=ptemplist->nlist;
+	        } 
+	        else{
+	            ptemplist=ptemplist->nlist;
+	        }
+	    }//找到最小指针 
+	    thekeyexpand=expandOpenList(tempmin->pnode,tempmin);// 
+	    if(thekeyexpand!=NULL) return thekeyexpand;
+	    optoclolist(tempmin);
+ 	}
+    return thekeyexpand;
+}
+list* expandOpenList(node* pnode,list* tempmin){
+    //openlist只是一个串起来的集合
+    list* thekeyexpand=NULL;//des
+    list* tailist=tempmin;
+    int tempx=0,tempy=0;
+    for(int i=0;i<=3;i++){
+        tempx=pnode->x+direction[i][0];
+        tempy=pnode->y+direction[i][1];
+        if((!inList(openlist,tempx,tempy)&&!illegalMap(tempx,tempy)&&!inList(closelist,tempx,tempy)))
+		    {
+            if(tempx==des->x&&tempy==des->y){
+                thekeyexpand=attachList(&tailist,tempx,tempy);//是目标 
+                return thekeyexpand;
+            }else{
+                attachList(&tailist,tempx,tempy);
+            }
+        }
+    }
+    return thekeyexpand;//是NULL的 
+}
+void optoclolist(list* tempmin){
+    list* temp=openlist;
+    list* preoftemp;
+    list* tail=gettail(closelist);
+    while(tempmin!=temp){
+        preoftemp=temp;
+        temp=temp->nlist;
+    }
+    if(openlist==tempmin){
+        openlist=tempmin->nlist;
+        if(tail==NULL) {closelist=tempmin;}
+        else {tail->nlist=tempmin;}
+        tempmin->nlist=NULL;
+    }else{
+        preoftemp->nlist=temp->nlist;
+        temp->nlist=NULL;
+        if(tail==NULL){closelist=tempmin;}
+        else{tail->nlist=temp;}
+    }
+}
+int inList(list* plist,int x,int y){
+	int judge; 
+    while(1){
+        if(plist==NULL) return judge=0;
+        if(x==plist->pnode->x&&y==plist->pnode->y){
+            return judge=1;
+        }else{
+            plist=plist->nlist;
+        }
+    }
+    return 0;
+}
+list* gettail(list* firstlist){
+    list* templist=firstlist;
+    if (templist==NULL) return templist;
+    while(1){
+        if(templist->nlist==NULL) return templist;
+        else templist=templist->nlist;
+    }
+    return templist;
+}
+list* attachList(list** ptailist,int x,int y){
+    //这里本没必要用二重指针，但防治其中需要改变某些指针的指向，所以一开始设计的时候用的二重指针
+    list* pre;
+    list* aft;
+    (*ptailist)->nlist=(list*)malloc(sizeof(list));
+    pre=(*ptailist);
+    aft=(*ptailist)->nlist;
+    aft->nlist=NULL;
+    aft->pnode=(node*)malloc(sizeof(node)); 
+    aft->father=pre;
+    aft->pnode->x=x;
+    aft->pnode->y=y;
+    aft->pnode->h=absolute(x,des->x)+absolute(y,des->y);
+    aft->pnode->g=pre->pnode->g+1;
+	return aft;
+}
+int illegalMap(int x,int y){
+	int judge;
+	int point=*(matrix+x*bordery+y);
+    if(x>borderx-1||x<0||y>bordery-1||y<0||point) judge=1;
+    else judge=0;
+    return judge;
+}
+int absolute(int a,int b){
+    if(a>=b) return a-b;
+    else return b-a;
+}
+void print(list* routelist){
+    while(routelist!=NULL){
+        printf("x:%d         y:%d\n",routelist->pnode->x,routelist->pnode->y);
+        routelist=routelist->nlist;
+    }
+}
