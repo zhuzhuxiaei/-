@@ -1,0 +1,379 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct LIST list;
+typedef struct LINK link;
+int SIZE=640*1024;//640kb
+int LEASTSIZE=50*1024;//50kb是允许的最小分区,最小内存碎片。
+struct LIST{
+    int size;
+    int* head;//该块的开头
+    int* tail;//tail不在该块，反而是下一块的开头
+    list* pre;
+    list* aft;
+    int pro;
+};
+/*为了解决首次适应算法所设计的数据结构*/
+struct LINK{
+    link* lastlink;
+    link* nextlink;
+    list* thelist;
+};
+link* findLink(list* localist);
+void rmLink(link* thelink);
+int joinLink(link* p);
+void printList();
+list* mylist;
+link* mylink;
+void initMymem(){
+    link* firstlink=(link*)malloc(sizeof(link));
+    list* firstlist=(list*)malloc(sizeof(list));
+    firstlink->lastlink=NULL;
+    firstlink->nextlink=NULL;
+    firstlink->thelist=firstlist;
+    firstlist->size=SIZE;
+    firstlist->head=(int*)malloc(SIZE);
+    int offset=SIZE/4;//计算尾指针的位置
+    firstlist->tail=firstlist->head+offset;
+    firstlist->pre=NULL;
+    firstlist->aft=NULL;
+    firstlist->pro=0;//pro为0代表未被使用,pro即进程id
+    mylink=firstlink;
+    mylist=firstlist;//使用一个全局变量免去许多传参的麻烦,如果不用全局变量则需要return
+}
+int firstsuitAlloc(int pro,int needsize){
+    list* templist=mylist;
+    int signal=0;
+    while(templist!=NULL){
+        if(templist->pro==0){//==0则代表可以进行分配尝试
+            if(templist->size>=needsize){
+                //是否大于LEASTSIZE
+                signal=1;
+                if(templist->size-needsize>=LEASTSIZE){
+                    //继续分块
+                    list* newlist=(list*)malloc(sizeof(list));
+                    newlist->size=templist->size-needsize;
+                    templist->size=needsize;
+                    templist->pro=pro;
+                    templist->tail=templist->head+templist->size/4;
+                    newlist->head=templist->tail;
+                    newlist->tail=newlist->head+newlist->size/4;
+                    newlist->pre=templist;
+                    newlist->aft=templist->aft;
+                    newlist->pro=0;
+                    templist->aft=newlist;
+                }else{
+                    //不再分块
+                    templist->pro=pro;
+                }
+                break;
+            }else{
+                //templist指向下一个
+                templist=templist->aft;
+            }
+        }else{
+            templist=templist->aft;
+        }
+    }
+    switch(signal){
+        case 1:
+            printf("success\n");
+            return 1;
+        case 0:
+            printf("fail\n");
+            return 0;
+    }
+}
+int firstsuitFree(int pro){
+    //遍历找到进程号
+    list* templist=mylist;
+    while(1){
+        if(templist==NULL){
+            printf("no pro\n");
+            return 0;
+        }
+        if(templist->pro==pro){
+            break;
+        }else{
+            templist=templist->aft;
+        }
+    }
+    //分四种情况，1，前可合并，2，后可合并，3，前后皆可和，4，前后皆不可合并
+    if(templist->pre!=NULL&&templist->pre->pro==0){
+        if(templist->aft!=NULL&&templist->aft->pro==0){
+            //将三块分区合并为一块,则保留第一块的数据结构
+            list* theend=templist->pre;
+            theend->size=theend->size+templist->size+templist->aft->size;
+            theend->tail=templist->aft->tail;
+            theend->aft=templist->aft->aft;
+            theend->pro=0;
+            free(templist->aft);//释放该块数据结构
+            free(templist);//释放
+        }else{
+            //只合并前向
+            list* theend=templist->pre;
+            theend->size=theend->size+templist->size;
+            theend->tail=templist->tail;
+            theend->aft=templist->aft;
+            theend->pro=0;
+            free(templist);
+        }
+    }else{
+        if(templist->aft!=NULL&&templist->aft->pro==0){
+            //合并后项
+            list* theaft=templist->aft;
+            templist->size=templist->size+templist->aft->size;
+            templist->tail=templist->aft->tail;
+            templist->aft=templist->aft->aft;
+            templist->pro=0;
+            free(theaft);
+        }else{
+            templist->pro=0;
+        }
+    }
+}
+int bestfitAlloc(int pro,int needsize){
+    link* templink=mylink;
+    int signal=0;
+    while(1){
+        if(templink==NULL) break;
+        if(templink->thelist->size>=needsize){
+            //进行分配
+            signal=1;
+            list* templist=templink->thelist;
+            if(templist->size-needsize>=LEASTSIZE){
+                //继续分块
+                link* newlink=(link*)malloc(sizeof(link));
+                list* newlist=(list*)malloc(sizeof(list));
+                newlink->thelist=newlist;
+                newlink->lastlink=NULL;
+                newlink->nextlink=NULL;
+                newlist->size=templist->size-needsize;
+                templist->size=needsize;
+                templist->pro=pro;
+                templist->tail=templist->head+templist->size/4;
+                newlist->head=templist->tail;
+                newlist->tail=newlist->head+newlist->size/4;
+                newlist->pre=templist;
+                newlist->aft=templist->aft;
+                newlist->pro=0;
+                templist->aft=newlist;
+                //将前link和后link结合起来，并将本link独立
+                link* prelink=templink->lastlink;
+                prelink->nextlink=templink->nextlink;
+                templink->lastlink=NULL;
+                templink->nextlink=NULL;
+                free(templink);
+                //开始排序link
+                joinLink(newlink);
+            }else{
+                //不再分块
+                templist->pro=pro;
+                templink->lastlink->nextlink=templink->nextlink;
+                templink->nextlink->lastlink=templink->lastlink;
+                free(templink);
+            }
+            break;
+        }else{
+            //移动指针
+            templink=templink->nextlink;
+        }
+    }
+    switch(signal){
+        case 0:
+            printf("fail\n");
+            return 0;
+        case 1:
+            printf("success\n");
+            return 1;
+    }
+    return 0;
+}
+int bestfitFree(int pro){
+    //首先遍历list,找到进程。是符合三种情况中的哪种情况
+    list* templist=mylist;
+    int signal=0;
+    while(1){
+        if(templist==NULL){
+            printf("cant find\n");
+            return 1;
+        }
+        if(templist->pro==pro) break;
+        else{
+            templist=templist->aft;
+        }
+    }
+    //找到templist之后判断是属于三种情况中哪一种情况
+    if(templist->pre!=NULL&&templist->pre->pro==0){
+        if(templist->aft!=NULL&&templist->aft->pro==0){
+            //三分区合并为一块
+            //先找到前后块对应的link，然后删除这些link，然后制作新link，然后添加
+            list* theend=templist->pre;
+            theend->size=theend->size+templist->size+templist->aft->size;
+            theend->tail=templist->aft->tail;
+            theend->aft=templist->aft->aft;
+            theend->pro=0;
+            free(templist->aft);//释放该块数据结构
+            free(templist);//释放
+            //块处理完毕，只剩下theend块
+            link* prelink=findLink(templist->pre);
+            link* aftlink=findLink(templist->aft);
+            //rmlink需要注意一个问题，如果rm的是首链，则需要进行额外的处理
+            rmLink(prelink);
+            rmLink(aftlink);
+            link* newlink=(link*)malloc(sizeof(link));
+            newlink->thelist=theend;
+            joinLink(newlink);
+        }else{
+            //只合并前向
+            list* theend=templist->pre;
+            theend->size=theend->size+templist->size;
+            theend->tail=templist->tail;
+            theend->aft=templist->aft;
+            theend->pro=0;
+            free(templist);
+            link* prelink=findLink(templist->pre);
+            rmLink(prelink);
+            link* newlink=(link*)malloc(sizeof(link));
+            newlink->thelist=theend;
+            joinLink(newlink);
+        }
+    }else{
+        if(templist->aft!=NULL&&templist->aft->pro==0){
+            //合并后项
+            list* theaft=templist->aft;
+            templist->size=templist->size+templist->aft->size;
+            templist->tail=templist->aft->tail;
+            templist->aft=templist->aft->aft;
+            templist->pro=0;
+            free(theaft);
+            link* aftlink=findLink(templist->aft);
+            rmLink(aftlink);
+            link* newlink=(link*)malloc(sizeof(link));
+            newlink->thelist=templist;
+            joinLink(newlink);
+        }else{
+            //都不合并
+            templist->pro=0;
+            link* newlink=(link*)malloc(sizeof(link));
+            newlink->thelist=templist;
+            joinLink(newlink);
+        }
+    }
+}
+link* findLink(list* localist){
+    link* templink=mylink;
+    while(templink!=NULL){
+        if(templink->thelist==localist) return templink;
+    }
+    return NULL;
+}
+void rmLink(link* thelink){
+    if(thelink==mylink){
+        if(thelink->nextlink==NULL) mylink=NULL;//独链，则直接清空链
+        else{
+            thelink->nextlink->lastlink=NULL;
+            mylink=thelink->nextlink;
+        }
+    }else{
+        if(thelink->nextlink==NULL){
+            //尾链
+            thelink->lastlink->nextlink=thelink->nextlink;
+        }else{
+            thelink->lastlink->nextlink=thelink->nextlink;
+            thelink->nextlink->lastlink=thelink->lastlink;
+        }
+    }
+}
+int joinLink(link* p){
+    if(mylink==NULL){
+        mylink=p;
+        return 0;
+    }
+    link* linktemp=mylink;
+    while(1){
+        if(p->thelist->size>linktemp->thelist->size){
+            if(linktemp->nextlink==NULL){
+                linktemp->nextlink=p;
+                p->nextlink=NULL;
+                p->lastlink=linktemp;
+                return 1;
+            }
+            linktemp=linktemp->nextlink;
+        }else{
+            if(linktemp==mylink){//是首地址
+                p->nextlink=linktemp;
+                mylink=p;
+            }else{//不是首地址
+                p->nextlink=linktemp;
+                p->lastlink=linktemp->lastlink;
+                linktemp->lastlink->nextlink=p;
+                linktemp->lastlink=p;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+void printList(){
+    list* templist=mylist;
+    while(templist!=NULL){
+        printf("----pro----size-----\n");
+        printf("----%d ----%d  -----\n",templist->pro,templist->size);
+        templist=templist->aft;
+    }
+}
+int main(){
+    initMymem();
+    int choose=1;
+    printf(" 1,firsuit 2,bestsuit \n");
+    scanf("%d",&choose);
+    if(choose==1){
+        int size=0;
+        int pro=0;
+        while(1){
+            printf("1,alloc  2,free 3,print \n");
+            scanf("%d",&choose);
+            if(choose==3){
+    			printList();
+    			continue;
+ 			} 
+            if(choose==-1) return 0;
+            if(choose==1){
+                printf("pro size -1 -1 => exit\n");
+                scanf("%d %d",&pro,&size);
+                firstsuitAlloc(pro,size);
+            }else if(choose==2){
+                printf("pro\n");
+                scanf("%d",&pro);
+                firstsuitFree(pro);
+            }else{
+                printf("wrong\n");
+            }
+        }
+    }else if(choose==2){
+        int size=0;
+        int pro=0;
+        while(1){
+        	printf(" 1,firsuit 2,bestsuit 3,print\n");
+            scanf("%d",&choose);
+            if(choose==3){
+    			printList();
+    			continue;
+ 			} 
+            if(choose==-1) return 0;
+            if(choose==1){
+                printf("pro size，-1，-1 => exit\n");
+                scanf("%d %d",&pro,&size);
+                bestfitAlloc(pro,size);
+            }else if(choose==2){
+            	printf("pro\n");
+                scanf("%d",&pro);
+                bestfitFree(pro);
+            }else{
+                printf("wrong\n");
+            }
+        }
+    }
+    return 0;
+} 
+
