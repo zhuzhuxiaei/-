@@ -317,8 +317,8 @@ int joinLink(link* p){
 void printList(){
     list* templist=mylist;
     while(templist!=NULL){
-        printf("----pro----size-----\n");
-        printf("----%d ----%d  -----\n",templist->pro,templist->size);
+        printf("----pro----size-----head\n");
+        printf("----%d ----%d  -----\n",templist->pro,templist->size,templist->head);
         templist=templist->aft;
     }
 }
