@@ -3,7 +3,7 @@
 typedef struct LIST list;
 typedef struct LINK link;
 int SIZE=640*1024;//640kb
-int LEASTSIZE=50*1024;//50kb是允许的最小分区,最小内存碎片。
+int LEASTSIZE=10*1024;//50kb是允许的最小分区,最小内存碎片。
 struct LIST{
     int size;
     int* head;//该块的开头
