@@ -318,7 +318,7 @@ void printList(){
     list* templist=mylist;
     while(templist!=NULL){
         printf("----pro----size-----head\n");
-        printf("----%d ----%d  -----\n",templist->pro,templist->size,templist->head);
+        printf("----%d ----%d-----%d-----\n",templist->pro,templist->size,templist->head);
         templist=templist->aft;
     }
 }
