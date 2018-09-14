@@ -1,0 +1,105 @@
+#include <stdio.h>
+#define N 6
+#define BIGGEST 63
+#define SIZE 500
+#define TRUE 1
+#define FALSE 0
+int shift();
+int generate();
+int generate2();
+int generate3();
+int KEY[6]={1,0,0,1,0,1};
+int output[SIZE];
+/*可以判断int数组的最小正周期*/
+int judge()
+{	
+	for(int i=1;i<BIGGEST;i++)
+	{
+		if(output[i]==output[0])
+		{
+			int offset=1;
+
+			while(1)
+			{
+				if(offset==i)
+				{//如果offset等于i,则检验余下所有长度下的子串. 
+					//检验下一个例程
+					int flag=TRUE;
+					for(int k=i+offset;k<SIZE;k++)
+					{
+						if(output[k%offset]!=output[k])//flag置为false
+						{
+							flag=FALSE;
+							break;
+						}
+					}
+					if(flag==TRUE)
+						return i;
+					else
+						break;
+				}
+				else
+				{		
+					//检验第二个子串
+					if(output[offset]==output[i+offset])
+					{
+						offset++;
+						continue;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+
+		}
+		
+	}
+	return BIGGEST;
+}
+int main(){
+	int temp=0;
+	shift();
+	printf("output:\n");
+	for(int i=0;i<=SIZE-1;i++){
+		printf("%d",output[i]); 
+	}
+	temp=judge();
+	printf("\nthe num is: %d",temp);
+
+	return 0;
+}
+int shift(){
+	for(int i=0;i<=SIZE-1;i++)
+	{
+		output[i]=KEY[5];
+		int temp=generate();
+		int temp2=generate2();
+		int temp3=generate3();
+		int templast;
+		if(temp2){
+			templast=temp;	
+		}else{
+			templast=temp3;
+		}
+		for(int j=N-1;j>=1;j--){
+			KEY[j]=KEY[j-1];
+		}
+		KEY[0]=templast;
+	}
+	return 0;
+}
+int generate(){
+	return (KEY[5]+KEY[3]+KEY[2])%2;
+}
+int generate2(){
+	return (KEY[2]+KEY[1])%2;
+}
+int generate3(){
+	return (KEY[0]+KEY[4])%2;
+}
+int enCrypt(){
+	
+	return 0;
+}
